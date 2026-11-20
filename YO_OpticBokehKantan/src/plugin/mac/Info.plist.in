@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Optic Bokeh mac port: Info.plist of an After Effects effect bundle (configured by CMakeLists.txt).
+     CFBundlePackageType eFKT + CFBundleSignature FXTC are what AE's plug-in loader expects (= Contents/PkgInfo). -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>@OB_BUNDLE_EXECUTABLE@</string>
+	<key>CFBundleIdentifier</key>
+	<string>@OB_BUNDLE_ID@</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>@OB_BUNDLE_NAME@</string>
+	<key>CFBundlePackageType</key>
+	<string>eFKT</string>
+	<key>CFBundleSignature</key>
+	<string>FXTC</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@OB_BUNDLE_VERSION_SHORT@</string>
+	<key>CFBundleVersion</key>
+	<string>@OB_BUNDLE_VERSION@</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>11.0</string>
+	<key>NSHumanReadableCopyright</key>
+	<string></string>
+</dict>
+</plist>

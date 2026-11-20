@@ -1,0 +1,38 @@
+# Map Bilinear Blur string table: kind<TAB>English (exact string used in the code)<TAB>Japanese.
+# kind: name = param / group / checkbox name (<= 31 bytes in the host code page), popup = '|'-separated
+# popup items (same count as English), msg = About / error text. Same format as Optic Bokeh's table.
+# Generated into mbb_strings_table.inc by tools\gen_strings.py. Avoid U+30DD (Shift_JIS trail byte '|') in popups.
+name	Method	方式
+popup	Plain Bilinear|Smooth|Protect Edges	素のバイリニア|なめらか|境目を守る
+name	Blur Radius	ブラーの半径
+name	Blur Map	ブラーマップ
+name	Map Layer	マップレイヤー
+name	Map Channel	マップのチャンネル
+popup	Luminance|Red|Green|Blue|Alpha	輝度|赤|緑|青|アルファ
+name	Invert Map	マップを反転
+name	Focus	ピント位置
+name	Focus Range	ピントの幅
+name	Depth Strength	奥行きの強さ
+name	Sharpen	シャープ
+name	Sharpen Amount	シャープ量
+name	Sharpen Type	シャープの種類
+popup	AE Standard Style|Wide (Unsharp)	AE標準風|大きめ(アンシャープ)
+name	Sharpen Radius	シャープの半径
+name	Layer Edges	レイヤーの端
+popup	Repeat Edge|Spread Outside|Clip to Layer	端を繰り返す|外へ広げる|レイヤーで切る
+name	View	表示
+popup	Result|Blur Amount	結果|ブラーの量
+msg	runs in After Effects only.	After Effects 専用です。
+msg	Depth-map pyramid blur with sharpen (prototype).	マップ対応のピラミッド・ブラー（シャープ付き、試作）。
+msg	Interpolations from nearest to Catmull-Rom, hex mosaic. CPU.	補間：ニアレストからキャットマル・ロム、六角モザイクまで。CPU 処理。
+msg	internal render error. The frame was not rendered.	内部エラーのため、このフレームは描画されませんでした。
+name	Interpolation	補間
+popup	Nearest|Bilinear|Smoothstep|Smooth (B-Spline)|Catmull-Rom|Hex Mosaic	ニアレスト|バイリニア|スムーズステップ|なめらか(Bスプライン)|キャットマル・ロム|六角モザイク
+name	Downsample	縮小の方法
+popup	Auto|Average (Crisp)|Smooth	自動|平均(くっきり)|なめらか
+name	Level Blend	段の混ぜ方
+popup	Smooth|Steps|Dither	なめらか|階段|ディザ
+name	Anti-Ringing	にじみ止め
+name	Protect Edges	境目を守る
+name	Dither Seed	ディザのシード
+name	Animate Dither	ディザを動かす

@@ -1,0 +1,32 @@
+[package]
+name = "mbbgpu"
+version = "0.3.1"
+edition = "2021"
+rust-version = "1.87"
+publish = false
+license = "LicenseRef-Proprietary"
+description = "Map Bilinear Blur GPU engine (wgpu). C ABI: include/mbbgpu.h"
+
+[lib]
+crate-type = ["staticlib", "rlib"]
+
+# mac_port: the backends are chosen per target (the v0.3.1 crate enabled dx12 + vulkan + metal for every target).
+# Features of one dependency are unified per target, so each platform compiles only its own backends; the set of
+# packages in Cargo.lock does not change (the lock file always lists the crates of every target).
+[dependencies]
+# same wgpu as Optic Bokeh's obgpu (LensBlur\gpu): already in the local cargo cache on the Windows machine
+wgpu = { version = "=30.0.2", default-features = false, features = ["std", "parking_lot", "wgsl"] }
+
+[target.'cfg(windows)'.dependencies]
+wgpu = { version = "=30.0.2", default-features = false, features = ["dx12", "vulkan"] }
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+wgpu = { version = "=30.0.2", default-features = false, features = ["metal"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+panic = "unwind"
+debug = false
+strip = "symbols"

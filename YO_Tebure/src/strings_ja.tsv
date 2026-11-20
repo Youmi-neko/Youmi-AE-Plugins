@@ -1,0 +1,115 @@
+# Tebure string table: kind<TAB>English (exact string used in the code)<TAB>Japanese.
+# kind: name = param / group / checkbox name (<= 31 bytes in BOTH UTF-8 (AE 26) and CP932 (AE 27)), popup = '|'-separated
+# items (same count as English; no CP932 trail byte 0x7C such as in U+30DD), msg = About / error text.
+# Generated into tb_strings_table.inc by tools\gen_strings.py (which also checks both encodings).
+name	Preset	プリセット
+popup	Custom|Handheld (Still)|Handheld (Tele)|Handheld (Wide)|Walking|Running|In a Car|Impact (Once)|Explosion / Rumble|Earthquake|Tripod in Wind|Drone Float|Film Gate Weave|Drunk / Dizzy|Heartbeat|Gamen-do (Vertical)|Gamen-do (Diagonal)|Anime Handheld on 3s	カスタム|手持ち（静止）|手持ち（望遠）|手持ち（広角）|歩き|走り|車内|衝撃（1回）|爆発・地響き|地震|風にあおられる三脚|ドローン・ふわふわ|フィルムのガタつき|酔い・めまい|心拍|画面動（タテ）|画面動（ナナメ）|コマ打ちの手持ち風
+name	Shake Amplitude	揺れ幅
+name	Period	周期
+name	Speed	速さ
+name	Focal Length (mm)	焦点距離 (mm)
+name	Shake Frame Rate	揺れのフレームレート
+popup	Same as Comp|24 fps|18 fps|16 fps|12 fps|8 fps|Hold Frames	コンプと同じ|24 fps|18 fps|16 fps|12 fps|8 fps|コマ数で指定
+name	Hold Frames	コマ打ち（コマ数）
+name	Horizontal	横の揺れ
+name	Vertical	縦の揺れ
+name	Position Low/High	低い揺れ／高い揺れ
+name	Roll	回転の揺れ
+name	Rotation Low/High	回転の低い／高い
+name	Zoom Amount	ズームの揺れ
+name	Zoom Low/High	ズームの低い／高い
+name	Hand Sway (deg)	手の揺れ (°)
+name	Sway Frequency (Hz)	揺れの周波数 (Hz)
+name	Sway Resonance	揺れの共振
+name	Roughness	細かさ
+name	Vertical Frequency	縦の周波数の比
+name	Vertical Amount	縦の揺れの比
+name	Roll Share	ロールの比
+name	Body Sway (px)	体の揺れ (px)
+name	Body Sway Freq (Hz)	体の揺れの周波数 (Hz)
+name	Tremor (deg)	震え (°)
+name	Breathing (deg)	呼吸 (°)
+name	Breathing Rate (Hz)	呼吸の速さ (Hz)
+name	Drift (deg)	ドリフト (°)
+name	Correction Interval (s)	補正の間隔 (秒)
+name	Steps / Beats per s	歩調・拍 (回/秒)
+name	Bounce (px)	上下の弾み (px)
+name	Side Sway (px)	左右の揺れ (px)
+name	Walk Roll (deg)	歩きのロール (°)
+name	Walk Pan (deg)	歩きのパン (°)
+name	Heel Strike (px)	着地の衝撃 (px)
+name	Running Shape	走りの弾み方
+name	Heartbeat Pulse (%)	心拍の拍動 (%)
+name	Impact	衝撃
+name	Impact Trigger	衝撃のきっかけ
+name	Impact at (s)	衝撃を1回 (秒)
+name	Decay (s)	減衰 (秒)
+name	Impact Type	衝撃の種類
+popup	Damped Shake|Gamen-do (Alternate)|Whip	減衰する揺れ|画面動（交互）|振り
+name	Impact Size (px)	衝撃の大きさ (px)
+name	Impact Rotation (deg)	衝撃の回転 (°)
+name	Impact Zoom (%)	衝撃のズーム (%)
+name	Impact Frequency (Hz)	衝撃の周波数 (Hz)
+name	Grit	ざらつき
+name	Impact Direction (deg)	衝撃の向き (°)
+name	Randomness	ばらつき
+name	Jolt Size (px)	ガクッの大きさ (px)
+name	Jolt Interval (s)	ガクッの間隔 (秒)
+name	Jolt Duration (s)	ガクッの時間 (秒)
+name	Jolt Overshoot	揺り戻し
+name	Jolt Direction	ガクッの向き
+popup	Free|Horizontal|Vertical|Alternate Axes	自由|横だけ|縦だけ|縦横に交互
+name	Jolt Vertical Ratio	ガクッの縦の比
+name	Vibration (px)	振動 (px)
+name	Vibration Freq (Hz)	振動の周波数 (Hz)
+name	Vibration Bandwidth	振動の幅
+name	Bumps (px)	段差 (px)
+name	Bumps per Second	段差の頻度 (回/秒)
+name	Large Motion (px)	大揺れ (px)
+name	Large Motion Freq (Hz)	大揺れの周波数 (Hz)
+name	Large Rotation (deg)	大揺れの回転 (°)
+name	Large Zoom (%)	大揺れのズーム (%)
+name	Swell	強弱のうねり
+name	Film	フィルム
+name	Gate Weave (px)	フィルムのゆらぎ (px)
+name	Frame Jitter (px)	コマのガタつき (px)
+name	Jitter Vertical Ratio	ガタつきの縦の比
+name	Motion Blur	モーションブラー
+name	Shutter Angle	シャッター角度
+name	Samples	サンプル数
+name	Blend in Linear Light	リニアで合成
+name	Edges	端の処理
+popup	Auto Scale to Hide|Repeat Edge|Mirror|Transparent (Overflow)|Transparent (In Layer)	自動で拡大して隠す|端を繰り返す|ミラー|透明（はみ出す）|透明（レイヤー内）
+name	Interpolation	補間
+popup	Bicubic|Lanczos 3	バイキュービック|ランチョス3
+name	Whole Pixels	ピクセルに合わせる
+name	Center	中心
+name	Reference Width (px)	基準の幅 (px)
+name	Seed	シード
+name	Cut	カット番号
+name	Loop (s)	ループ (秒)
+name	View	表示
+popup	Result|Motion Graph	結果|揺れのグラフ
+name	Render Version	Render Version
+msg	Camera shake with physically modelled hand-held, walking, impact, vehicle and film motion (prototype).	手持ち・歩き・衝撃・乗り物・フィルムの動きを物理的に作るカメラの揺れ（試作）。
+msg	Presets write the detail values; editing one turns the preset to Custom. CPU.	プリセットは詳細の値を書き込みます。値を変えるとカスタムになります。CPU。
+msg	runs in After Effects only.	は After Effects 専用です。
+msg	internal render error. The frame was not rendered.	内部エラーのため、このフレームは描画されませんでした。
+name	Preset Paths	揺れの見本
+msg	Custom (edited)	カスタム（値を変更）
+name	Direction Balance	量と向きのバランス
+name	Detail: Hand / Body	詳細：手・体
+name	Walking / Heartbeat	歩き・心拍
+name	Vehicle / Earthquake	乗り物・地震
+name	Jolts / Searching	ガクッ・探る
+name	Cuts / Auto	カット・おまかせ
+name	View / Center / Other	表示・中心・その他
+name	Auto: Calm / Lively	おまかせ：静か／活発
+name	Irregularity	不規則さ
+name	Step Variation	歩幅・歩調のばらつき
+name	Quake Waves (P then S)	地震の波（P波→S波）
+name	Random Impacts Every (s)	衝撃の自動間隔 (秒)
+name	Zoom to Hide Edges	拡大
+popup	Auto (Follow Amplitude)|Fixed %|None|Constant per Shot (0.2)	自動（揺れ幅に追従）|固定 %|なし|ショット内一定（0.2）
+name	Fixed Zoom (%)	固定の拡大率 (%)
+name	Zoom Smoothing (s)	拡大のなめらかさ

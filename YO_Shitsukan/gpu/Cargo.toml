@@ -1,0 +1,30 @@
+[package]
+name = "skgpu"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Shitsukan GPU path (wgpu): probe stage"
+
+[lib]
+crate-type = ["staticlib", "rlib"]
+
+# mac_port: the backend per platform (resolver 2: the other platform's features are not unified in).
+# Windows / Linux: Vulkan (as shipped). macOS: Metal (no f64 in Metal: only the line stage can run there, see
+# PORTING_NOTES.md "GPU" - the painter's tail needs SHADER_F64 and is switched off automatically).
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+wgpu = { version = "=30.0.2", default-features = false, features = ["std", "parking_lot", "vulkan", "wgsl"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+wgpu = { version = "=30.0.2", default-features = false, features = ["std", "parking_lot", "metal", "wgsl"] }
+
+[profile.release]
+opt-level = 3
+debug = false
+
+# mac_port: wgpu-hal 30.0.2 compiles Metal shaders with Metal's default FAST math (contraction, approximate
+# division, flush-to-zero): bad for a bit-exact path. gpu/patches/ holds a one-line change that turns it off; to use
+# it, run sh gpu/patches/apply_wgpu_hal_patch.sh: it copies wgpu-hal 30.0.2 from the cargo cache into gpu/patches/wgpu-hal,
+# patches it, uncomments the two lines below AND refreshes Cargo.lock (cargo update -p wgpu-hal), so build_gpu_mac.sh's
+# --locked builds keep working. (Uncommenting by hand without the lock refresh makes --locked fail.)
+# [patch.crates-io]
+# wgpu-hal = { path = "patches/wgpu-hal" }

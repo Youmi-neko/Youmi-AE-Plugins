@@ -1,0 +1,32 @@
+# Build outputs
+build/
+build_*/
+out/
+dist/
+target/
+**/target/
+
+# Compiled binaries / bundles
+*.aex
+*.plugin
+*.dll
+*.lib
+*.a
+*.obj
+*.o
+*.res
+*.rsrc
+*.rr
+*.rrc
+*.pdb
+*.ilk
+*.exp
+
+# IDE / OS
+.vscode/
+.vs/
+.idea/
+.DS_Store
+Thumbs.db
+*.user
+*.suo

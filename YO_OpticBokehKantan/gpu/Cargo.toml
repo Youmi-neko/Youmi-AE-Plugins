@@ -1,0 +1,31 @@
+[package]
+name = "obgpu"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.87"
+publish = false
+license = "LicenseRef-Proprietary"
+description = "Optic Bokeh GPU blur stage (wgpu). C ABI: include/obgpu.h"
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+# default features minus gles / webgpu / web; std + parking_lot kept (wgpu defaults)
+wgpu = { version = "=30.0.2", default-features = false, features = ["std", "parking_lot", "dx12", "vulkan", "metal", "wgsl"] }
+
+# Windows: DXGI QueryVideoMemoryInfo for the VRAM budget (src/vram.rs). Same crate and version that wgpu-hal
+# already uses (no new crate in Cargo.lock).
+[target.'cfg(windows)'.dependencies]
+windows = { version = "=0.62.2", features = ["Win32_Foundation", "Win32_Graphics_Dxgi"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+panic = "unwind"
+debug = false
+strip = "symbols"
+
+[dev-dependencies]
+naga = { version = "=30.0.2", features = ["wgsl-in", "hlsl-out"] }

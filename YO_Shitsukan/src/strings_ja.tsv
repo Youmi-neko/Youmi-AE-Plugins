@@ -1,0 +1,101 @@
+# kind	English (key used in the code)	Japanese (UTF-8). Generate: python -I tools\gen_strings.py
+name	Style	スタイル
+popup	Custom|Texture Only|Blur Fills, Keep Lines|Watercolor (Loose)|Watercolor (Careful)|Line and Wash Sketch|Picture Book Watercolor|BG Art (Transparent Watercolor)|Wet-in-Wet|Watercolor (Old Filter)|Background Art Boost|Smooth Skin|Soft Lines|Line and Wash (Round 6)|Picture Book (Round 6)|BG Art (Round 6)	カスタム|質感だけ|線を残してぼかす|水彩（ゆるい）|水彩（ていねい）|線と淡彩のスケッチ|絵本の水彩|背景美術（透明水彩）|にじみの水彩|水彩（旧）|背景美術を強調|肌をなめらかに|線画をやわらかく|淡彩スケッチ（第6回）|絵本の水彩（第6回）|背景美術（第6回）
+name	Amount	量
+name	Texture	質感
+name	Fine Detail	細部
+name	Mid Detail	中間
+name	Large Light/Dark	大きな明暗
+name	Detail Size	細部の大きさ
+name	Halo Control	ハロー抑制
+name	Edge Aware	境目を守る
+name	Color Detail	色の細部
+name	Lines	線
+name	Protect Lines	線を守る
+name	Line Detection	線の検出
+name	Line Width	線の幅
+name	Fill Blur	塗りのぼかし
+name	Keep Color Edges	色の境目を残す
+name	Line Thickness	線の太さ
+name	Line Darkness	線の濃さ
+name	Line Softness	線のやわらかさ
+name	Watercolor	水彩
+name	Watercolor Amount	水彩の強さ
+name	Painting Method	描き方
+popup	Paint in Washes|Filter (Old)	面で塗る|フィルター（旧）
+name	Wash Size	面のまとまり
+name	Merge Colors	色をまとめる
+name	Overshoot and Gaps	はみ出し・塗り残し
+name	Lift Darks	暗さを抑える
+name	Color Drift	色の混ざり
+name	Pigments	絵の具の数
+name	Pigment Set	絵の具の種類
+popup	Watercolor Pigments|Storybook (Soft)|Storybook (Bright)|Source Colors (Simplified)	水彩の絵の具|絵本（やわらか）|絵本（あざやか）|元の色を少なく
+name	Distortion	ゆがみ
+name	Painting Engine	塗りの版
+popup	Current (Stable in Video)|Round 6 (Look First)	いまの版（安定）|第6回の版（見た目）
+name	Paper Margin	紙の余白
+name	Flatten Washes	面の均し
+name	Flatten Size	均しの大きさ
+name	Edge Darkening	ふちの濃さ
+name	Edge Width	ふちの幅
+name	Bleed	にじみ
+name	Bleed Width	にじみの幅
+name	Backruns	戻りじみ
+name	Wobble	ふちの揺らぎ
+name	Wobble Scale	揺らぎの大きさ
+name	Pigment Unevenness	色ムラ
+name	Granulation	紙の粒
+name	Paper Texture	紙の目
+name	Paper Scale	紙の目の大きさ
+name	Keep Whites	白を残す
+name	Dilution	色の淡さ
+name	Paper Layer	紙レイヤー
+name	Map	マップ
+name	Map Layer	マップレイヤー
+name	Map Affects	マップの効き先
+popup	Whole Effect|Texture|Fill Blur|Watercolor|Lines	全体|質感|塗りのぼかし|水彩|線
+name	Map Channel	マップのチャンネル
+popup	Luminance|Alpha|Red|Green|Blue	輝度|アルファ|R|G|B
+name	Invert Map	マップを反転
+name	Map Use	マップの使い方
+popup	Strength Mask|Depth Matte	強さのマスク|デプスマット
+name	Map Blur	マップのぼかし
+name	Reference Depth	基準の深さ
+name	Depth Range	深さの範囲
+name	Pick Depth at Point	画面で深さを指定
+name	Depth Point	深さを取る点
+name	Depth Strength	深さの効き具合
+name	Depth: Amount	深さ：全体の量
+name	Depth: Wash Size	深さ：面のまとまり
+name	Depth: Wetness	深さ：にじみ
+name	Depth: Lines	深さ：線の強さ
+name	Depth: Paleness	深さ：紙の白・淡さ
+name	Depth: Texture	深さ：質感
+name	Depth: Blur	深さ：ブラー
+name	Layer Edges	レイヤーの端
+popup	Repeat Edge|Paper Outside Layer	端を繰り返す|外は紙として扱う
+name	View	表示
+popup	Result|Line Mask|Fine Detail|Mid Detail|Large Light/Dark|Edge Darkening|Fill (Lines Removed)|Brush Strokes|Glazes|Map|Depth Weight	結果|線マスク|細部|中間|大きな明暗|ふちの濃さ|塗り（線を抜く）|筆あと|重ね塗り|マップ|深さの重み
+name	Seed	シード
+name	Move Paper	紙を動かす
+name	Every N Frames	何コマごと
+name	Render Version	描画の版
+msg	runs in After Effects only.	は After Effects 専用です。
+msg	internal render error. The frame was not rendered.	内部エラーのため、このフレームは描画されませんでした。
+msg	Texture, line-keeping blur and watercolor in one effect (prototype).	質感・線を残すぼかし・水彩をひとつにしたエフェクト（試作）。
+msg	Lines are detected as ink; fills are processed under them. CPU.	線をインクとして見分け、その下の塗りだけを加工します。CPU。
+name	Line Color	線の色
+popup	Dark Lines|Dark and Colored Lines|Also Light Lines	暗い線だけ|暗い線と色の線|明るい線も
+name	Black Fills as Walls	黒ベタを壁にする
+name	Background Detail as Lines	背景の細部も線に
+name	Line Style	線の描き方
+popup	As Is|Pencil|Ink	そのまま|鉛筆|墨
+name	Brush Strokes	筆あと
+name	Stroke Length	筆の長さ
+name	Stroke Angle	筆の向き
+name	Glazing	重ね塗り
+name	Pigment Runs Down	下にたまる
+name	Protect Small Features	小さな形を守る
+name	Working Space	作業スペース
+popup	Gamma (Normal)|Linear	ガンマ（通常）|リニア

@@ -1,0 +1,181 @@
+# Optic Bokeh v2.3 string table: kind<TAB>English (exact string used in the code)<TAB>Japanese.
+# kind: name = param / group / checkbox name (<= 31 bytes in the host code page), popup = '|'-separated
+# popup items (same item count as English, each item <= 31 bytes), label = picker labels / UI text
+# (UTF-16 in Drawbot, no byte limit), msg = About / error text (return_msg, <= 255 bytes).
+# Optional 4th column (items only): the popup text when the Japanese text has a Shift_JIS byte 0x7C ('|',
+# e.g. the trail byte of ポ) that would split the popup item; the picker labels (UTF-16) keep the 3rd column.
+# Optional 5th column: the text for UTF-8 host strings when the 3rd column is longer than the 31-byte SDK
+# limit in UTF-8 (3 bytes per kana / kanji). UTF-8 has no "|" trail-byte problem, so it ignores the 4th column.
+# The host encoding is chosen by OB_HOST_STRING_ENCODING (plugin\OpticBokehConfig.h): English only / CP932 / UTF-8.
+# Generated into ob_strings_table.inc by tools\gen_strings.py (ASCII-escaped). Review copy: docs\param_names_ja.md
+name	Lens Preset	レンズプリセット
+name	Preset Thumbnails	プリセットの見本
+name	Quality	画質
+popup	Fast (Alpha)|Standard|Best (Beta)	高速（α）|標準|最高画質（β）
+name	View	表示
+popup	Result|Blur Amount|Highlight Source|Highlights Only	結果|ブラーの量|ハイライトの元|ハイライトのみ
+name	Radius	ブラーの半径
+name	Blur Map	ブラーマップ
+name	Map Layer	マップレイヤー
+name	Map Channel	マップのチャンネル
+popup	Luminance|Red|Green|Blue|Alpha	輝度|赤|緑|青|アルファ
+name	Invert Map	マップを反転
+name	Focus	ピント位置
+name	Map Scale	マップの倍率
+name	Map Gamma	マップのガンマ
+name	Iris	絞り
+name	Blades	絞り羽根の枚数
+name	Blade Curvature	羽根の曲率
+name	Corner Rounding	角の丸み
+name	Rotation	回転
+name	Anamorphic	アナモルフィック
+name	Cat Eye	口径食
+name	Obstruction	中央遮蔽
+name	Lens Character	レンズの味
+name	Edge Ring	縁の明るさ
+name	Ring Width	縁の幅
+name	Edge Softness	縁のやわらかさ
+name	Apodization	アポダイゼーション
+name	Core Brightness	中心の明るさ
+name	Spherical Aberration	球面収差
+name	Onion Rings	年輪ボケ
+name	Onion Ring Count	年輪の本数
+name	Chroma Fringe	色にじみ
+name	Fringe Tint	色にじみの色味
+name	Falloff & Glow	周辺減光とグロー
+name	Vignetting	周辺減光
+name	Veiling Glow	にじみ光
+name	Glow Size	にじみ光の大きさ
+name	Highlights	ハイライト
+name	Highlight Boost	ハイライトの強さ
+name	Highlight Knee	ハイライトのしきい値
+name	Highlight Curve	ハイライトのカーブ
+name	Size Selectivity	大きさで選ぶ
+name	Detail Size	光の大きさ
+name	Min Detail Size	最小の大きさ
+name	White Protection	白の保護
+name	Dots vs Lines	点と線の判定
+name	Highlight Saturation	ハイライトの彩度
+name	Highlight Source	ハイライトの元
+popup	Automatic|Highlight Layer Only|Automatic x Highlight Layer	自動|ハイライトレイヤーのみ|自動×ハイライトレイヤー		自動|ハイライト層のみ|自動×ハイライト層
+name	Highlight Layer	ハイライトレイヤー
+name	Highlight Layer Channel	ハイライトのチャンネル		ハイライトのチャネル
+name	Highlight Rolloff	ハイライトの肩
+name	Classic Gain (v1)	旧ゲイン（v1）
+name	Classic Threshold	旧しきい値
+name	Classic Gain	旧ゲイン
+name	Halation & Aberration	ハレーションと輝度収差		ハレーション・収差
+name	Halation	ハレーション
+name	Halation Size	ハレーションの大きさ
+name	Halation Threshold	ハレーションのしきい値		ハレーションしきい値
+name	Halation Above Scene	周囲より明るい段数
+name	Halation Softness	ハレーションの柔らかさ		ハレーション柔らかさ
+name	Halation Rim	ハレーションの縁
+name	Halation Tint	ハレーションの色
+name	Aberration Style	輝度収差のスタイル
+name	Style Thumbnails	スタイルの見本
+name	Luminance Aberration	輝度収差
+name	Aberration Side	輝度収差の出方
+popup	Bleed into Dark Side|Tint Bright Side|Both|Drawn Rim|Channel Drift	暗い側へにじむ|明るい側が色づく|両方|線を描く|チャンネルずれ
+name	Aberration Width	輝度収差の幅
+name	Aberration Threshold	輝度収差のしきい値
+name	Aberration Curve	輝度収差のカーブ
+name	Hue by Contrast	差で色を変える
+name	Aberration Color	輝度収差の色
+name	Rim Contrast Scale	縁の比較範囲
+name	Rim Line Protection	線画の保護
+name	Rim Sharpness	縁のくっきりさ
+name	Rim Color from Bright Side	明るい側の色を使う
+name	Rim Blur	縁のぼかし
+name	Rim Complement	補色の縁
+name	Fringe Color	色ずれの色
+popup	Orange (G+B move)|Red / Cyan (R opposite)|Blue (R+G move)|Magenta (G moves)|Green (R+B move)	オレンジ（G+B）|赤・シアン（R逆）|青（R+G）|マゼンタ（G）|緑（R+B）
+name	Fringe Side	色ずれの側
+popup	Bright Edge (channels retreat)|Dark Edge (channels advance)	明るい縁（退く）|暗い縁（進む）
+name	Map Softness	境目の向きのなめらかさ		境目の向きの滑らかさ
+name	Preserve Detail	細部を守る
+name	Grain	グレイン
+name	Grain Stock	フィルムの種類
+name	Stock Thumbnails	フィルムの見本
+name	Grain Amount	グレインの量
+name	Grain Size	粒の大きさ
+name	Grain Softness	粒の柔らかさ
+name	Grain Color	粒の色
+name	Grain Tone Response	明るさごとの効き方
+name	Animate Grain	粒を動かす
+name	Grain Hold Frames	同じ粒のフレーム数
+name	Grain Seed	グレインのシード
+name	Best Quality (Beta)	最高画質（β）
+name	Disc Texture Amount	玉の模様の量
+name	Texture Scale	模様の大きさ
+name	Texture Type	模様の種類
+popup	Mixed|Fine Grain|Dust|Wipe Streaks|Polishing Marks|Soap Bubble	ミックス|細かい粒|ほこり|拭きすじ|研磨跡|シャボン玉
+name	Texture Seed	模様のシード
+name	Spectral Samples (0=Auto)	分光の数（0=自動）
+name	Lateral Chromatic Aberration	倍率色収差
+name	Work in Linear Light	リニアで計算
+name	Input Gamma	入力のガンマ
+popup	Auto|Gamma 2.2|Linear	自動|ガンマ 2.2|リニア
+name	Edge Behavior	レイヤーの端
+popup	Spread|Repeat Edge|Clip to Layer	外へ広げる|端を繰り返す|レイヤーで切る
+name	Repeat Edge Pixels	端のピクセルを繰り返す		端の画素を繰り返す
+name	Render Version	レンダーバージョン
+item	Custom	カスタム
+item	Premium Portrait f/1.2	高級ポートレート f/1.2	高級人物レンズ f/1.2
+item	Ultra-Fast Normal f/0.95	超大口径標準 f/0.95
+item	Fast Portrait Outlined	大口径ポートレート・輪郭	大口径人物レンズ・輪郭	大口径人物・輪郭
+item	Chromatic Fast Prime	色収差の大口径
+item	Modern Aspherical	非球面モダン
+item	Creamy Apodized	とろけるアポダイズ	とろける縁のボケ
+item	Stopped-Down Sparkle	絞り込みキラキラ
+item	Hexagon Classic	六角形クラシック
+item	Pentagon Vintage	五角形オールド
+item	Vintage Heptagon Glow	七角形グロー
+item	Soap Bubble Triplet	シャボン玉トリプレット		バブルトリプレット
+item	Swirly Vintage	ぐるぐるボケ
+item	Dreamy Soft Focus	ドリーミー・ソフト
+item	Mirror Lens Donut	ミラーレンズ・リング
+item	Anamorphic Cine	アナモルフィック
+item	Vintage Fast Prime	オールド大口径開放
+item	Soft Bleed	やわらかなにじみ
+item	Wide Glow	広いにじみ
+item	Bright Tint	明るい側の色づき
+item	Contrast Rim	境目の色ずれ
+item	Red / Cyan Fringe	赤とシアンの色ずれ
+item	Soft Glow Fringe	やわらかな光の縁
+item	Hard Rim (v2.1)	くっきりした線（v2.1）
+item	Fine 35mm	細かい 35mm
+item	Medium 35mm	標準の 35mm
+item	Coarse 16mm	粗い 16mm
+item	Pushed High-ISO	増感・高感度
+item	8mm Home Movie	8mm ホームムービー
+label	Custom (edited)	カスタム（変更あり）
+label	Rendering previews...	見本を作成中…
+label	Preview exaggerated	見本は強調表示
+msg	Camera-style lens blur with depth / blur map.	深度マップ（ブラーマップ）で使うカメラ風のレンズぼかし。
+msg	Quality: Fast / Standard / Best. CPU rendering.	画質：高速／標準／最高画質。CPU で計算します。
+msg	runs in After Effects only.	は After Effects 専用です。
+msg	the render engine rejected the frame (invalid size or settings).	レンダリングエンジンがこのフレームを処理できませんでした（サイズまたは設定が不正）。
+msg	internal render engine error. The frame was not rendered.	レンダリングエンジンの内部エラー。このフレームは描画されませんでした。
+msg	unexpected internal error. The command was not completed.	予期しない内部エラー。処理を完了できませんでした。
+# v2.3 Optic Bokeh Kantan (simple edition)
+name	Lens	レンズ
+name	Aperture	絞り
+name	Character	レンズの味
+name	Bokeh Highlights	玉ボケ
+name	Film Look	フィルム感
+name	Kantan Version	かんたん版のバージョン		かんたん版の版数
+# v2.3 blur-map features (both editions) and Kantan's map / chroma controls
+name	Focus Range	ピントの幅
+name	Front Blur	前ボケの量
+name	Back Blur	後ボケの量
+name	Map Blur	マップのぼかし
+name	Focus at Point	点の位置にピント
+name	Focus Point	ピントの点
+name	Depth Strength	奥行きの強さ
+name	Depth Curve	奥行きのカーブ
+name	Chromatic Aberration	色収差
+# v2.4 GPU
+name	Use GPU	GPU を使う
+popup	Auto|Off (CPU only)	自動|使わない（CPU のみ）
+msg	Quality: Fast / Standard / Best. GPU for Fast / Standard.	画質：高速／標準／最高画質。高速と標準は GPU も使います。
