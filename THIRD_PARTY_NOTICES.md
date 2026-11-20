@@ -8,13 +8,13 @@ The plug-ins in this repository depend on or link against the following third-pa
 
 ## 1. Rust & `wgpu` Ecosystem Crates (GPU Acceleration)
 
-Used by `YO_OpticBokehKantan/gpu/`, `YO_MapBilinearBlur_ja/gpu/`, and `YO_Shitsukan/gpu/` for cross-platform GPU compute acceleration (Vulkan / DirectX 12 on Windows, Metal on macOS).
+Used by `YO_OpticBokeh/gpu/` (shared by `YO_OpticBokeh` and `YO_OpticBokehKantan`), `YO_MapBilinearBlur_ja/gpu/`, and `YO_Shitsukan/gpu/` for cross-platform GPU compute acceleration (Vulkan / DirectX 12 on Windows, Metal on macOS).
 
 - **`wgpu` / `wgpu-core` / `wgpu-hal` / `naga` / `wgpu-types`** — Dual-licensed under **MIT** or **Apache-2.0** (https://github.com/gfx-rs/wgpu)
 - **`bytemuck`**, **`pollster`**, **`ash`**, **`windows`**, **`objc2`** and transitive crates pinned in each plugin's `gpu/Cargo.lock` — Licensed under permissive open-source licenses (**MIT**, **Apache-2.0**, **BSD-2-Clause**, **BSD-3-Clause**, **Zlib**, **ISC**, **Unicode-3.0**).
 
 The exact resolved dependency graph and versions are recorded in:
-- `YO_OpticBokehKantan/gpu/Cargo.lock`
+- `YO_OpticBokeh/gpu/Cargo.lock`
 - `YO_MapBilinearBlur_ja/gpu/Cargo.lock`
 - `YO_Shitsukan/gpu/Cargo.lock`
 

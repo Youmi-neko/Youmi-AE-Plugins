@@ -1,4 +1,5 @@
-# YO Optic Bokeh Kantan 2.4.2 - CMake build for Windows (x64 .aex) and macOS (universal arm64 + x86_64 .plugin).
+# YO Optic Bokeh & YO Optic Bokeh Kantan 2.4.2
+# CMake build for Windows (x64 .aex) and macOS (universal arm64 + x86_64 .plugin).
 #
 # macOS:
 #   cmake -S . -B build -G Ninja -DAE_SDK_DIR=/path/to/AfterEffectsSDK_26.5_mac/Examples -DCMAKE_BUILD_TYPE=Release
@@ -6,6 +7,8 @@
 # Windows (MSVC 2022 x64 Native Tools prompt):
 #   cmake -S . -B build -G Ninja -DAE_SDK_DIR=...\AfterEffectsSDK_26.5_win\Examples -DCMAKE_BUILD_TYPE=Release
 #   cmake --build build
+#
+# Produces both YO_OpticBokeh (full edition) and YO_OpticBokehKantan (simple edition).
 #
 # Picture rule: the engine must be compiled WITHOUT floating-point contraction and WITHOUT fast-math
 # (MSVC: /fp:precise; clang: -ffp-contract=off). Do not add -ffast-math, -Ofast, /fp:fast, /arch:AVX2 or -mfma.
@@ -20,7 +23,7 @@ if(APPLE)
   endif()
 endif()
 
-project(OpticBokehKantan VERSION 2.4.2.1 LANGUAGES C CXX)
+project(OpticBokeh VERSION 2.4.2.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -33,7 +36,7 @@ set(AE_SDK_DIR "" CACHE PATH "After Effects SDK 'Examples' directory (contains H
 set(OBGPU_LIB "" CACHE FILEPATH "Prebuilt obgpu static library (Windows obgpu.lib / macOS universal libobgpu.a). Empty: build with cargo.")
 option(OB_SSE2_EMULATION "x64 only: compile the engine with the portable SSE2 stand-in used on arm64" OFF)
 option(OB_STATIC_CRT "Windows: static CRT (/MT)" ON)
-option(OB_WITH_GPU "Link the Rust/wgpu GPU stage (OFF: CPU-only plug-in, no cargo required)" ON)
+option(OB_WITH_GPU "Link the Rust/wgpu GPU stage (OFF: CPU-only plug-ins, no cargo required)" ON)
 option(OB_MAC_GPU_DEFAULT_ON "macOS: use the GPU without OPTICBOKEH_GPU=1" OFF)
 
 set(OB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -193,69 +196,82 @@ else()
   set(OB_WRAPPER_DEFS "")
 endif()
 
-# ---------------------------------------------------------------- the plug-in (YO_OpticBokehKantan)
-set(tgt OpticBokehKantan)
-set(outname YO_OpticBokehKantan)
-set(dispname "YO Optic Bokeh Kantan")
-set(pipl_dir ${CMAKE_BINARY_DIR}/pipl_kantan)
-file(MAKE_DIRECTORY ${pipl_dir})
+# ---------------------------------------------------------------- the plug-ins (YO_OpticBokeh & YO_OpticBokehKantan)
+foreach(edition IN ITEMS full kantan)
+  if(edition STREQUAL "full")
+    set(tgt OpticBokeh)
+    set(outname YO_OpticBokeh)
+    set(dispname "YO Optic Bokeh")
+    set(edefs "")
+  else()
+    set(tgt OpticBokehKantan)
+    set(outname YO_OpticBokehKantan)
+    set(dispname "YO Optic Bokeh Kantan")
+    set(edefs OB_KANTAN)
+  endif()
+  set(pipl_dir ${CMAKE_BINARY_DIR}/pipl_${edition})
+  file(MAKE_DIRECTORY ${pipl_dir})
 
-if(WIN32)
-  add_custom_command(OUTPUT ${pipl_dir}/PiPL.rc
-    COMMAND ${CMAKE_COMMAND} -DSDK=${AE_SDK_DIR} -DR=${OB_SRC}/plugin/OpticBokehPiPL.r -DDIR=${pipl_dir}
-            -DKANTAN=1 -DCL=${CMAKE_CXX_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pipl_win.cmake
-    DEPENDS ${OB_SRC}/plugin/OpticBokehPiPL.r ${OB_SRC}/plugin/OpticBokehConfig.h ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pipl_win.cmake
-    COMMENT "PiPL (YO_OpticBokehKantan)" VERBATIM)
-  add_library(${tgt} SHARED ${OB_SRC}/plugin/OpticBokeh.cpp ${pipl_dir}/PiPL.rc ${OB_SRC}/plugin/OpticBokeh.rc)
-  set_target_properties(${tgt} PROPERTIES OUTPUT_NAME ${outname} SUFFIX ".aex" PREFIX "")
-  target_compile_options(${tgt} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/WX>)
-  target_link_options(${tgt} PRIVATE /OPT:REF /OPT:ICF /MANIFEST:NO)
-else()
-  set(rsrc ${pipl_dir}/${outname}.rsrc)
-  set(OB_REZ_SYSROOT "${CMAKE_OSX_SYSROOT}")
-  if(NOT IS_DIRECTORY "${OB_REZ_SYSROOT}")
-    execute_process(COMMAND xcrun --sdk macosx --show-sdk-path OUTPUT_VARIABLE OB_REZ_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(WIN32)
+    add_custom_command(OUTPUT ${pipl_dir}/PiPL.rc
+      COMMAND ${CMAKE_COMMAND} -DSDK=${AE_SDK_DIR} -DR=${OB_SRC}/plugin/OpticBokehPiPL.r -DDIR=${pipl_dir}
+              -DKANTAN=$<IF:$<STREQUAL:${edition},kantan>,1,0> -DCL=${CMAKE_CXX_COMPILER} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pipl_win.cmake
+      DEPENDS ${OB_SRC}/plugin/OpticBokehPiPL.r ${OB_SRC}/plugin/OpticBokehConfig.h ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pipl_win.cmake
+      COMMENT "PiPL (${outname})" VERBATIM)
+    add_library(${tgt} SHARED ${OB_SRC}/plugin/OpticBokeh.cpp ${pipl_dir}/PiPL.rc ${OB_SRC}/plugin/OpticBokeh.rc)
+    set_target_properties(${tgt} PROPERTIES OUTPUT_NAME ${outname} SUFFIX ".aex" PREFIX "")
+    target_compile_options(${tgt} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/WX>)
+    target_link_options(${tgt} PRIVATE /OPT:REF /OPT:ICF /MANIFEST:NO)
+  else()
+    set(rsrc ${pipl_dir}/${outname}.rsrc)
+    set(OB_REZ_SYSROOT "${CMAKE_OSX_SYSROOT}")
+    if(NOT IS_DIRECTORY "${OB_REZ_SYSROOT}")
+      execute_process(COMMAND xcrun --sdk macosx --show-sdk-path OUTPUT_VARIABLE OB_REZ_SYSROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+    set(rezsys "")
+    if(IS_DIRECTORY "${OB_REZ_SYSROOT}")
+      set(rezsys -isysroot "${OB_REZ_SYSROOT}")
+    endif()
+    set(rezdefs -d AE_OS_MAC -d __MACH__ -d __arm64__)
+    if(edition STREQUAL "kantan")
+      list(APPEND rezdefs -d OB_KANTAN)
+    endif()
+    add_custom_command(OUTPUT ${rsrc}
+      COMMAND xcrun Rez -o ${rsrc} -useDF -script Roman ${rezdefs}
+              -i ${AE_SDK_DIR}/Headers -i ${AE_SDK_DIR}/Headers/SP -i ${AE_SDK_DIR}/Resources -i ${OB_SRC}/plugin
+              ${rezsys} ${OB_SRC}/plugin/OpticBokehPiPL.r
+      DEPENDS ${OB_SRC}/plugin/OpticBokehPiPL.r ${OB_SRC}/plugin/OpticBokehConfig.h
+      COMMENT "Rez PiPL (${outname})" VERBATIM)
+    set(OB_TPL "")
+    if(OB_WITH_GPU AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../THIRD_PARTY_NOTICES.md)
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../THIRD_PARTY_NOTICES.md ${pipl_dir}/THIRD_PARTY_NOTICES.md COPYONLY)
+      set(OB_TPL ${pipl_dir}/THIRD_PARTY_NOTICES.md)
+    endif()
+    add_library(${tgt} MODULE ${OB_SRC}/plugin/OpticBokeh.cpp ${rsrc} ${OB_TPL})
+    set_source_files_properties(${rsrc} ${OB_TPL} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set(OB_BUNDLE_EXECUTABLE ${outname})
+    set(OB_BUNDLE_ID "com.youmi.${tgt}")
+    set(OB_BUNDLE_NAME "${dispname}")
+    set(OB_BUNDLE_VERSION_SHORT "2.4.2")
+    set(OB_BUNDLE_VERSION "2.4.2.1")
+    configure_file(${OB_SRC}/plugin/mac/Info.plist.in ${pipl_dir}/Info.plist @ONLY)
+    set_target_properties(${tgt} PROPERTIES
+      BUNDLE TRUE BUNDLE_EXTENSION plugin
+      MACOSX_BUNDLE_INFO_PLIST ${pipl_dir}/Info.plist
+      OUTPUT_NAME ${outname})
+    target_compile_options(${tgt} PRIVATE -Werror=return-type)
+    target_link_options(${tgt} PRIVATE "LINKER:-exported_symbols_list,${OB_SRC}/plugin/mac/exports.txt" "LINKER:-dead_strip")
+    add_custom_command(TARGET ${tgt} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -DOUT=$<TARGET_BUNDLE_CONTENT_DIR:${tgt}>/PkgInfo -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkginfo.cmake
+      COMMENT "PkgInfo (eFKT / FXTC)" VERBATIM)
   endif()
-  set(rezsys "")
-  if(IS_DIRECTORY "${OB_REZ_SYSROOT}")
-    set(rezsys -isysroot "${OB_REZ_SYSROOT}")
-  endif()
-  set(rezdefs -d AE_OS_MAC -d __MACH__ -d __arm64__ -d OB_KANTAN)
-  add_custom_command(OUTPUT ${rsrc}
-    COMMAND xcrun Rez -o ${rsrc} -useDF -script Roman ${rezdefs}
-            -i ${AE_SDK_DIR}/Headers -i ${AE_SDK_DIR}/Headers/SP -i ${AE_SDK_DIR}/Resources -i ${OB_SRC}/plugin
-            ${rezsys} ${OB_SRC}/plugin/OpticBokehPiPL.r
-    DEPENDS ${OB_SRC}/plugin/OpticBokehPiPL.r ${OB_SRC}/plugin/OpticBokehConfig.h
-    COMMENT "Rez PiPL (YO_OpticBokehKantan)" VERBATIM)
-  set(OB_TPL "")
-  if(OB_WITH_GPU AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../THIRD_PARTY_NOTICES.md)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../THIRD_PARTY_NOTICES.md ${pipl_dir}/THIRD_PARTY_NOTICES.md COPYONLY)
-    set(OB_TPL ${pipl_dir}/THIRD_PARTY_NOTICES.md)
-  endif()
-  add_library(${tgt} MODULE ${OB_SRC}/plugin/OpticBokeh.cpp ${rsrc} ${OB_TPL})
-  set_source_files_properties(${rsrc} ${OB_TPL} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set(OB_BUNDLE_EXECUTABLE ${outname})
-  set(OB_BUNDLE_ID "com.youmi.${tgt}")
-  set(OB_BUNDLE_NAME "${dispname}")
-  set(OB_BUNDLE_VERSION_SHORT "2.4.2")
-  set(OB_BUNDLE_VERSION "2.4.2.1")
-  configure_file(${OB_SRC}/plugin/mac/Info.plist.in ${pipl_dir}/Info.plist @ONLY)
-  set_target_properties(${tgt} PROPERTIES
-    BUNDLE TRUE BUNDLE_EXTENSION plugin
-    MACOSX_BUNDLE_INFO_PLIST ${pipl_dir}/Info.plist
-    OUTPUT_NAME ${outname})
-  target_compile_options(${tgt} PRIVATE -Werror=return-type)
-  target_link_options(${tgt} PRIVATE "LINKER:-exported_symbols_list,${OB_SRC}/plugin/mac/exports.txt" "LINKER:-dead_strip")
-  add_custom_command(TARGET ${tgt} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -DOUT=$<TARGET_BUNDLE_CONTENT_DIR:${tgt}>/PkgInfo -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pkginfo.cmake
-    COMMENT "PkgInfo (eFKT / FXTC)" VERBATIM)
-endif()
 
-ob_engine_tu(${tgt})
-target_include_directories(${tgt} PRIVATE ${OB_WRAPPER_INC} ${OB_SDK_INC})
-target_compile_definitions(${tgt} PRIVATE ${OB_WRAPPER_DEFS} OB_KANTAN)
-target_sources(${tgt} PRIVATE $<TARGET_OBJECTS:ob_engine> $<TARGET_OBJECTS:ob_ui> $<TARGET_OBJECTS:ob_platform>)
-target_link_libraries(${tgt} PRIVATE obgpu)
-if(APPLE)
-  target_link_libraries(${tgt} PRIVATE "-framework CoreFoundation")
-endif()
+  ob_engine_tu(${tgt})
+  target_include_directories(${tgt} PRIVATE ${OB_WRAPPER_INC} ${OB_SDK_INC})
+  target_compile_definitions(${tgt} PRIVATE ${OB_WRAPPER_DEFS} ${edefs})
+  target_sources(${tgt} PRIVATE $<TARGET_OBJECTS:ob_engine> $<TARGET_OBJECTS:ob_ui> $<TARGET_OBJECTS:ob_platform>)
+  target_link_libraries(${tgt} PRIVATE obgpu)
+  if(APPLE)
+    target_link_libraries(${tgt} PRIVATE "-framework CoreFoundation")
+  endif()
+endforeach()

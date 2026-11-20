@@ -1,4 +1,4 @@
-// VERSIONINFO for YO_OpticBokehKantan.aex. ASCII only.
+// VERSIONINFO for YO_OpticBokeh.aex / YO_OpticBokehKantan.aex (rc /DOB_KANTAN). ASCII only.
 #include <winver.h>
 #include "OpticBokehConfig.h"
 

@@ -30,7 +30,9 @@
 #include "ob_settings.h"        // v2.3: Settings + engine adapter (shared with Kantan)
 #include "ob_mapx.h"           // v2.3: blur-map features (Map Blur, Focus Range, Front / Back, Focus Point)
 #include "ob_gpu.h"            // v2.4: the GPU blur stage (gpu\obgpu)
+#ifdef OB_KANTAN
 #include "kantan.h"             // v2.3 Kantan: the link curves
+#endif
 #include "../platform/ob_platform.h"  // mac port: getenv / fopen (Windows: the v2.4.2 CRT calls)
 
 #include <algorithm>
@@ -79,6 +81,275 @@ const bool kHostPixelsPremultiplied = false;
 
 // Param indices (order in the Effect Controls). Saved projects match params by disk ID, so the
 // order may change between versions; disk IDs below may not.
+#ifndef OB_KANTAN
+enum
+{
+    OB_INPUT = 0,
+    OB_PRESET,
+    OB_LENS_PICKER,     // v2.3 thumbnail picker (custom UI, no data)
+    OB_QUALITY,
+    OB_USE_GPU,         // v2.4
+    OB_VIEW,
+    OB_RADIUS,
+    OB_MAP_GROUP_START,
+    OB_MAP_LAYER,
+    OB_MAP_CHANNEL,
+    OB_MAP_INVERT,
+    OB_FOCUS,
+    OB_MAP_SCALE,
+    OB_MAP_GAMMA,
+    OB_FOCUS_RANGE,     // v2.3 map features (ob_mapx.h)
+    OB_FRONT_BLUR,
+    OB_BACK_BLUR,
+    OB_MAP_BLUR,
+    OB_FOCUS_POINT_ON,
+    OB_FOCUS_POINT,
+    OB_MAP_GROUP_END,
+    OB_IRIS_GROUP_START,
+    OB_BLADES,
+    OB_CURVATURE,
+    OB_CORNER,
+    OB_ROTATION,
+    OB_ANAMORPHIC,
+    OB_CATEYE,
+    OB_OBSTRUCTION,
+    OB_IRIS_GROUP_END,
+    OB_LENS_GROUP_START,
+    OB_EDGE_RING,
+    OB_RING_WIDTH,
+    OB_SOFTNESS,
+    OB_APOD,
+    OB_CORE,
+    OB_SA,
+    OB_ONION,
+    OB_ONION_COUNT,
+    OB_CHROMA,
+    OB_FRINGE_TINT,
+    OB_LENS_GROUP_END,
+    OB_FALLOFF_GROUP_START,
+    OB_VIGNETTE,
+    OB_GLOW,
+    OB_GLOW_SIZE,
+    OB_FALLOFF_GROUP_END,
+    OB_HL_GROUP_START,
+    OB_HL_BOOST,
+    OB_HL_KNEE,
+    OB_HL_CURVE,
+    OB_HL_SEL,
+    OB_HL_DETAIL,
+    OB_HL_DETAIL_MIN,
+    OB_HL_WHITE,
+    OB_HL_DOTS,
+    OB_HL_SAT,
+    OB_HL_SOURCE,
+    OB_HL_LAYER,
+    OB_HL_LAYER_CHANNEL,
+    OB_HL_ROLLOFF,
+    OB_CLASSIC_GROUP_START,
+    OB_HL_THRESHOLD,
+    OB_HL_GAIN,
+    OB_CLASSIC_GROUP_END,
+    OB_HL_GROUP_END,
+    OB_FILM_GROUP_START,
+    OB_HAL_AMOUNT,
+    OB_HAL_SIZE,
+    OB_HAL_THRESHOLD,
+    OB_HAL_RELATIVE,
+    OB_HAL_SOFTNESS,
+    OB_HAL_RIM,
+    OB_HAL_TINT,
+    OB_LA_STYLE,
+    OB_STYLE_PICKER,    // v2.3
+    OB_LA_AMOUNT,
+    OB_LA_MODE,
+    OB_LA_WIDTH,
+    OB_LA_THRESHOLD,
+    OB_LA_CURVE,
+    OB_LA_HUE,
+    OB_LA_TINT,
+    OB_LA_SCALE,
+    OB_LA_LINE,
+    OB_LA_SHARP,
+    OB_LA_BRIGHTCOL,
+    OB_LA_BLUR,
+    OB_LA_COMPLEMENT,
+    OB_LA_FRINGE,
+    OB_LA_DIR,
+    OB_LA_MAPSOFT,
+    OB_LA_PRESERVE,
+    OB_FILM_GROUP_END,
+    OB_GRAIN_GROUP_START,
+    OB_GRAIN_STOCK,
+    OB_STOCK_PICKER,    // v2.3
+    OB_GRAIN_AMOUNT,
+    OB_GRAIN_SIZE,
+    OB_GRAIN_SOFT,
+    OB_GRAIN_COLOR,
+    OB_GRAIN_TONE,
+    OB_GRAIN_ANIMATE,
+    OB_GRAIN_HOLD,
+    OB_GRAIN_SEED,
+    OB_GRAIN_GROUP_END,
+    OB_HQ_GROUP_START,
+    OB_HQ_TEX_AMOUNT,
+    OB_HQ_TEX_SCALE,
+    OB_HQ_TEX_TYPE,
+    OB_HQ_TEX_SEED,
+    OB_HQ_SPECTRAL,
+    OB_HQ_LATERAL_CA,
+    OB_HQ_GROUP_END,
+    OB_LINEAR,
+    OB_INPUT_GAMMA,     // v2.2
+    OB_EDGE_MODE,       // v2.2 (replaces the Repeat Edge Pixels checkbox in the UI)
+    OB_REPEAT_EDGE,     // v2.1 checkbox, hidden: a v2.1 project with it on still renders Repeat Edge
+    OB_RENDER_VERSION,  // v2.2, hidden
+    OB_NUM_PARAMS
+};
+
+// Disk IDs: stable forever, never reuse or renumber (saved projects depend on them).
+enum
+{
+    DISK_VIEW = 1,
+    DISK_RADIUS,
+    DISK_MAP_GROUP_START,
+    DISK_MAP_LAYER,
+    DISK_MAP_CHANNEL,
+    DISK_MAP_INVERT,
+    DISK_FOCUS,
+    DISK_MAP_SCALE,
+    DISK_MAP_GAMMA,
+    DISK_MAP_GROUP_END,
+    DISK_IRIS_GROUP_START,
+    DISK_BLADES,
+    DISK_CURVATURE,
+    DISK_ROTATION,
+    DISK_ANAMORPHIC,
+    DISK_CATEYE,
+    DISK_IRIS_GROUP_END,
+    DISK_LENS_GROUP_START,
+    DISK_EDGE_RING,
+    DISK_RING_WIDTH,
+    DISK_CHROMA,
+    DISK_LENS_GROUP_END,
+    DISK_HL_GROUP_START,
+    DISK_HL_THRESHOLD,
+    DISK_HL_GAIN,
+    DISK_HL_GROUP_END,
+    DISK_LINEAR,
+    // v1.1
+    DISK_PRESET = 28,
+    DISK_CORNER,
+    DISK_OBSTRUCTION,
+    DISK_SA,
+    DISK_SOFTNESS,
+    DISK_APOD,
+    DISK_CORE,
+    DISK_ONION,
+    DISK_ONION_COUNT,
+    DISK_FALLOFF_GROUP_START,
+    DISK_VIGNETTE,
+    DISK_GLOW,
+    DISK_GLOW_SIZE,
+    DISK_FALLOFF_GROUP_END,
+    DISK_UNUSED_42,  // v1.1 "Glints" group start (never released; not reused)
+    DISK_HL_BOOST,   // 43 (was v1.1 Glint Gain)
+    DISK_HL_DETAIL,  // 44 (was v1.1 Glint Size)
+    DISK_UNUSED_45,  // v1.1 Glint Threshold (not reused)
+    DISK_HL_SAT,     // 46 (was v1.1 Glint Saturation)
+    DISK_UNUSED_47,  // v1.1 "Glints" group end (not reused)
+    // v1.2
+    DISK_HL_KNEE = 48,
+    DISK_HL_CURVE,
+    DISK_HL_SEL,
+    DISK_HL_ROLLOFF,
+    DISK_CLASSIC_GROUP_START,
+    DISK_CLASSIC_GROUP_END,
+    DISK_FRINGE_TINT,
+    // v2.0
+    DISK_HL_WHITE = 55,
+    DISK_HL_DOTS,
+    DISK_HL_DETAIL_MIN,
+    DISK_HL_SOURCE,
+    DISK_HL_LAYER,
+    DISK_HL_LAYER_CHANNEL,
+    DISK_FILM_GROUP_START,
+    DISK_HAL_AMOUNT,
+    DISK_HAL_SIZE,
+    DISK_HAL_THRESHOLD,
+    DISK_HAL_SOFTNESS,
+    DISK_HAL_RIM,
+    DISK_HAL_TINT,
+    DISK_LA_AMOUNT,
+    DISK_LA_WIDTH,
+    DISK_LA_THRESHOLD,
+    DISK_LA_CURVE,
+    DISK_LA_HUE,
+    DISK_LA_TINT,
+    DISK_LA_MODE,
+    DISK_FILM_GROUP_END,
+    DISK_HQ_GROUP_START,
+    DISK_HQ_TEX_AMOUNT,
+    DISK_HQ_TEX_SCALE,
+    DISK_HQ_TEX_TYPE,
+    DISK_HQ_TEX_SEED,
+    DISK_HQ_SPECTRAL,
+    DISK_HQ_LATERAL_CA,
+    DISK_HQ_GROUP_END,
+    DISK_REPEAT_EDGE,
+    // v2.1 (append only)
+    DISK_QUALITY,       // 85
+    DISK_LA_STYLE,      // 86
+    DISK_HAL_RELATIVE,  // 87
+    DISK_LA_SCALE,      // 88
+    DISK_LA_LINE,       // 89
+    DISK_LA_SHARP,      // 90
+    DISK_LA_BRIGHTCOL,  // 91
+    // v2.1b-d (append only)
+    DISK_LA_BLUR,       // 92
+    DISK_LA_COMPLEMENT, // 93
+    DISK_LA_FRINGE,     // 94
+    DISK_LA_DIR,        // 95
+    DISK_LA_MAPSOFT,    // 96
+    DISK_LA_PRESERVE,   // 97
+    DISK_GRAIN_GROUP_START, // 98
+    DISK_GRAIN_STOCK,   // 99
+    DISK_GRAIN_AMOUNT,  // 100
+    DISK_GRAIN_SIZE,    // 101
+    DISK_GRAIN_SOFT,    // 102
+    DISK_GRAIN_COLOR,   // 103
+    DISK_GRAIN_TONE,    // 104
+    DISK_GRAIN_ANIMATE, // 105
+    DISK_GRAIN_HOLD,    // 106
+    DISK_GRAIN_SEED,    // 107
+    DISK_GRAIN_GROUP_END, // 108
+    // v2.2 (append only)
+    DISK_EDGE_MODE,     // 109
+    DISK_INPUT_GAMMA,   // 110
+    DISK_RENDER_VERSION, // 111
+    // v2.3 (append only): the thumbnail pickers (PF_Param_NO_DATA: nothing is saved)
+    DISK_LENS_PICKER,   // 112
+    DISK_STYLE_PICKER,  // 113
+    DISK_STOCK_PICKER,  // 114
+    // v2.3 blur-map features (append only); defaults reproduce the earlier output exactly
+    DISK_MAP_BLUR,      // 115
+    DISK_FOCUS_RANGE,   // 116
+    DISK_FRONT_BLUR,    // 117
+    DISK_BACK_BLUR,     // 118
+    DISK_FOCUS_POINT_ON, // 119
+    DISK_FOCUS_POINT,   // 120
+    // v2.4 (append only)
+    DISK_USE_GPU        // 121
+};
+static_assert(DISK_LENS_PICKER == 112 && DISK_STOCK_PICKER == 114, "disk ID layout v2.3");
+static_assert(DISK_MAP_BLUR == 115 && DISK_FOCUS_POINT == 120, "disk ID layout v2.3 map features");
+static_assert(DISK_USE_GPU == 121, "disk ID layout v2.4");
+static_assert(DISK_EDGE_MODE == 109 && DISK_RENDER_VERSION == 111, "disk ID layout v2.2");
+static_assert(DISK_LINEAR == 27, "existing disk IDs must never change");
+static_assert(DISK_HL_SAT == 46 && DISK_FRINGE_TINT == 54, "disk ID layout");
+static_assert(DISK_HL_WHITE == 55 && DISK_REPEAT_EDGE == 84, "disk ID layout v2.0");
+static_assert(DISK_QUALITY == 85 && DISK_LA_BRIGHTCOL == 91, "disk ID layout v2.1");
+static_assert(DISK_LA_BLUR == 92 && DISK_GRAIN_GROUP_START == 98 && DISK_GRAIN_GROUP_END == 108, "disk ID layout v2.1d");
+#else
 // ---- Optic Bokeh Kantan (simple edition, v2.3): its own params and disk IDs (a separate effect with
 // its own match name, so the numbering starts at 1). The index names shared with the full effect
 // (OB_PRESET, OB_QUALITY, ...) let the common code (pickers, render, grain flags) serve both editions.
@@ -162,6 +433,7 @@ enum
     KDISK_USE_GPU       // 35 (v2.4)
 };
 static_assert(KDISK_VERSION == 24 && KDISK_CHROMA == 34 && KDISK_USE_GPU == 35, "Kantan disk ID layout v2.4");
+#endif
 
 
 // SmartFX checkout ids.
@@ -261,6 +533,7 @@ inline A_long ScaledExtent(A_long fullRes, double ds)
     return (A_long)std::ceil(fullRes * ds - 1e-6);
 }
 
+#ifdef OB_KANTAN
 // Kantan: the Kantan controls -> kantan::ToSettings (the full effect's UI values, kantan.cpp); from
 // there on everything is the full effect's code.
 PF_Err ReadSettings(PF_InData* in_data, Settings& s)
@@ -320,6 +593,150 @@ PF_Err ReadSettings(PF_InData* in_data, Settings& s)
     }
     return err;
 }
+#else
+PF_Err ReadSettings(PF_InData* in_data, Settings& s)
+{
+    PF_Err err = PF_Err_NONE, err2 = PF_Err_NONE;
+    PF_ParamDef p[OB_NUM_PARAMS];
+    bool out[OB_NUM_PARAMS] = {};
+    const int idx[] = {OB_VIEW,         OB_RADIUS,      OB_MAP_CHANNEL,   OB_MAP_INVERT,  OB_FOCUS,
+                       OB_MAP_SCALE,    OB_MAP_GAMMA,   OB_BLADES,        OB_CURVATURE,   OB_ROTATION,
+                       OB_ANAMORPHIC,   OB_CATEYE,      OB_EDGE_RING,     OB_RING_WIDTH,  OB_CHROMA,
+                       OB_HL_THRESHOLD, OB_HL_GAIN,     OB_LINEAR,        OB_CORNER,      OB_OBSTRUCTION,
+                       OB_SA,           OB_SOFTNESS,    OB_APOD,          OB_CORE,        OB_ONION,
+                       OB_ONION_COUNT,  OB_VIGNETTE,    OB_GLOW,          OB_GLOW_SIZE,   OB_FRINGE_TINT,
+                       OB_HL_BOOST,     OB_HL_KNEE,     OB_HL_CURVE,      OB_HL_SEL,      OB_HL_DETAIL,
+                       OB_HL_SAT,       OB_HL_ROLLOFF,  OB_HL_WHITE,      OB_HL_DOTS,     OB_HL_DETAIL_MIN,
+                       OB_HL_SOURCE,    OB_HL_LAYER_CHANNEL, OB_HAL_AMOUNT, OB_HAL_SIZE,  OB_HAL_THRESHOLD,
+                       OB_HAL_SOFTNESS, OB_HAL_RIM,     OB_HAL_TINT,      OB_LA_AMOUNT,   OB_LA_WIDTH,
+                       OB_LA_THRESHOLD, OB_LA_CURVE,    OB_LA_HUE,        OB_LA_TINT,     OB_LA_MODE,
+                       OB_HQ_TEX_AMOUNT, OB_HQ_TEX_SCALE, OB_HQ_TEX_TYPE, OB_HQ_TEX_SEED, OB_HQ_SPECTRAL,
+                       OB_HQ_LATERAL_CA, OB_REPEAT_EDGE, OB_QUALITY,    OB_HAL_RELATIVE, OB_LA_SCALE,
+                       OB_LA_LINE,      OB_LA_SHARP,    OB_LA_BRIGHTCOL, OB_LA_BLUR,   OB_LA_COMPLEMENT,
+                       OB_LA_FRINGE,    OB_LA_DIR,      OB_LA_MAPSOFT,    OB_LA_PRESERVE, OB_GRAIN_AMOUNT,
+                       OB_GRAIN_SIZE,   OB_GRAIN_SOFT,  OB_GRAIN_COLOR,   OB_GRAIN_TONE, OB_GRAIN_ANIMATE,
+                       OB_GRAIN_HOLD,   OB_GRAIN_SEED,  OB_EDGE_MODE,     OB_INPUT_GAMMA, OB_RENDER_VERSION,
+                       OB_MAP_BLUR,     OB_FOCUS_RANGE, OB_FRONT_BLUR,    OB_BACK_BLUR,   OB_FOCUS_POINT_ON,
+                       OB_FOCUS_POINT,  OB_USE_GPU};
+    for (int i : idx)
+    {
+        AEFX_CLR_STRUCT(p[i]);
+        ERR(PF_CHECKOUT_PARAM(in_data, i, in_data->current_time, in_data->time_step, in_data->time_scale, &p[i]));
+        if (!err)
+            out[i] = true;
+    }
+    if (!err)
+    {
+        s.view = p[OB_VIEW].u.pd.value;
+        s.radius = p[OB_RADIUS].u.fs_d.value;
+        s.mapChannel = p[OB_MAP_CHANNEL].u.pd.value;
+        s.invertMap = p[OB_MAP_INVERT].u.bd.value != 0;
+        s.focusPct = p[OB_FOCUS].u.fs_d.value;
+        s.mapScale = p[OB_MAP_SCALE].u.fs_d.value;
+        s.mapGamma = p[OB_MAP_GAMMA].u.fs_d.value;
+        s.blades = p[OB_BLADES].u.sd.value;
+        s.curvaturePct = p[OB_CURVATURE].u.fs_d.value;
+        s.rotationDeg = (double)p[OB_ROTATION].u.ad.value / 65536.0;
+        s.anamorphic = p[OB_ANAMORPHIC].u.fs_d.value;
+        s.catEyePct = p[OB_CATEYE].u.fs_d.value;
+        s.edgeRingPct = p[OB_EDGE_RING].u.fs_d.value;
+        s.ringWidthPct = p[OB_RING_WIDTH].u.fs_d.value;
+        s.chromaPct = p[OB_CHROMA].u.fs_d.value;
+        s.hlThreshold = p[OB_HL_THRESHOLD].u.fs_d.value;
+        s.hlGain = p[OB_HL_GAIN].u.fs_d.value;
+        s.linear = p[OB_LINEAR].u.bd.value != 0;
+        s.cornerPct = p[OB_CORNER].u.fs_d.value;
+        s.obstructionPct = p[OB_OBSTRUCTION].u.fs_d.value;
+        s.saPct = p[OB_SA].u.fs_d.value;
+        s.softnessPct = p[OB_SOFTNESS].u.fs_d.value;
+        s.apodPct = p[OB_APOD].u.fs_d.value;
+        s.corePct = p[OB_CORE].u.fs_d.value;
+        s.onionPct = p[OB_ONION].u.fs_d.value;
+        s.onionCount = p[OB_ONION_COUNT].u.fs_d.value;
+        s.vignettePct = p[OB_VIGNETTE].u.fs_d.value;
+        s.glowPct = p[OB_GLOW].u.fs_d.value;
+        s.glowSizePct = p[OB_GLOW_SIZE].u.fs_d.value;
+        s.fringeTintPct = p[OB_FRINGE_TINT].u.fs_d.value;
+        s.hlBoost = p[OB_HL_BOOST].u.fs_d.value;
+        s.hlKnee = p[OB_HL_KNEE].u.fs_d.value;
+        s.hlCurve = p[OB_HL_CURVE].u.fs_d.value;
+        s.hlSelPct = p[OB_HL_SEL].u.fs_d.value;
+        s.hlDetail = p[OB_HL_DETAIL].u.fs_d.value;
+        s.hlSatPct = p[OB_HL_SAT].u.fs_d.value;
+        s.hlRolloffPct = p[OB_HL_ROLLOFF].u.fs_d.value;
+        s.hlWhitePct = p[OB_HL_WHITE].u.fs_d.value;
+        s.hlDotsPct = p[OB_HL_DOTS].u.fs_d.value;
+        s.hlDetailMin = p[OB_HL_DETAIL_MIN].u.fs_d.value;
+        s.hlSource = p[OB_HL_SOURCE].u.pd.value;
+        s.hlLayerChannel = p[OB_HL_LAYER_CHANNEL].u.pd.value;
+        s.halPct = p[OB_HAL_AMOUNT].u.fs_d.value;
+        s.halSizePct = p[OB_HAL_SIZE].u.fs_d.value;
+        s.halThreshold = p[OB_HAL_THRESHOLD].u.fs_d.value;
+        s.halSoftPct = p[OB_HAL_SOFTNESS].u.fs_d.value;
+        s.halRimPct = p[OB_HAL_RIM].u.fs_d.value;
+        s.halTint[0] = SrgbToLinear(p[OB_HAL_TINT].u.cd.value.red);
+        s.halTint[1] = SrgbToLinear(p[OB_HAL_TINT].u.cd.value.green);
+        s.halTint[2] = SrgbToLinear(p[OB_HAL_TINT].u.cd.value.blue);
+        s.laPct = p[OB_LA_AMOUNT].u.fs_d.value;
+        s.laWidthPct = p[OB_LA_WIDTH].u.fs_d.value;
+        s.laThreshold = p[OB_LA_THRESHOLD].u.fs_d.value;
+        s.laCurve = p[OB_LA_CURVE].u.fs_d.value;
+        s.laHuePct = p[OB_LA_HUE].u.fs_d.value;
+        s.laTint[0] = SrgbToLinear(p[OB_LA_TINT].u.cd.value.red);
+        s.laTint[1] = SrgbToLinear(p[OB_LA_TINT].u.cd.value.green);
+        s.laTint[2] = SrgbToLinear(p[OB_LA_TINT].u.cd.value.blue);
+        s.laMode = p[OB_LA_MODE].u.pd.value;
+        s.hqTexPct = p[OB_HQ_TEX_AMOUNT].u.fs_d.value;
+        s.hqTexScale = p[OB_HQ_TEX_SCALE].u.fs_d.value;
+        s.hqTexType = p[OB_HQ_TEX_TYPE].u.pd.value;
+        s.hqTexSeed = p[OB_HQ_TEX_SEED].u.sd.value;
+        s.hqSpectral = p[OB_HQ_SPECTRAL].u.sd.value;
+        s.hqLateralPct = p[OB_HQ_LATERAL_CA].u.fs_d.value;
+        s.repeatEdge = p[OB_REPEAT_EDGE].u.bd.value != 0;
+        s.quality = p[OB_QUALITY].u.pd.value;
+        s.halRelative = p[OB_HAL_RELATIVE].u.fs_d.value;
+        s.laScalePct = p[OB_LA_SCALE].u.fs_d.value;
+        s.laLinePct = p[OB_LA_LINE].u.fs_d.value;
+        s.laSharpPct = p[OB_LA_SHARP].u.fs_d.value;
+        s.laBrightColPct = p[OB_LA_BRIGHTCOL].u.fs_d.value;
+        s.laBlurPct = p[OB_LA_BLUR].u.fs_d.value;
+        s.laComplementPct = p[OB_LA_COMPLEMENT].u.fs_d.value;
+        s.laFringe = p[OB_LA_FRINGE].u.pd.value;
+        s.laDir = p[OB_LA_DIR].u.pd.value;
+        s.laMapSoftPct = p[OB_LA_MAPSOFT].u.fs_d.value;
+        s.laPreservePct = p[OB_LA_PRESERVE].u.fs_d.value;
+        s.grainPct = p[OB_GRAIN_AMOUNT].u.fs_d.value;
+        s.grainSize = p[OB_GRAIN_SIZE].u.fs_d.value;
+        s.grainSoftPct = p[OB_GRAIN_SOFT].u.fs_d.value;
+        s.grainColorPct = p[OB_GRAIN_COLOR].u.fs_d.value;
+        s.grainTonePct = p[OB_GRAIN_TONE].u.fs_d.value;
+        s.grainAnimate = p[OB_GRAIN_ANIMATE].u.bd.value != 0;
+        s.grainHold = p[OB_GRAIN_HOLD].u.sd.value;
+        s.grainSeed = p[OB_GRAIN_SEED].u.sd.value;
+        s.edgeMode = p[OB_EDGE_MODE].u.pd.value;
+        s.inputGamma = p[OB_INPUT_GAMMA].u.pd.value;
+        s.renderVersion = std::max(1, std::min(kRenderVersionCurrent, (int)p[OB_RENDER_VERSION].u.sd.value));
+        s.edge = EffectiveEdge(s.edgeMode, s.repeatEdge);
+        s.mapBlurPx = p[OB_MAP_BLUR].u.fs_d.value;
+        s.focusRangePct = p[OB_FOCUS_RANGE].u.fs_d.value;
+        s.frontPct = p[OB_FRONT_BLUR].u.fs_d.value;
+        s.backPct = p[OB_BACK_BLUR].u.fs_d.value;
+        s.focusPointOn = p[OB_FOCUS_POINT_ON].u.bd.value != 0;
+        s.focusPointX = (double)p[OB_FOCUS_POINT].u.td.x_value / 65536.0;
+        s.focusPointY = (double)p[OB_FOCUS_POINT].u.td.y_value / 65536.0;
+        s.useGpu = p[OB_USE_GPU].u.pd.value;
+        // Work in Linear Light with an already-linear input: no decode / encode
+        if (InputIsLinear(s.inputGamma))
+            s.linear = false;
+    }
+    for (int i : idx)
+    {
+        if (out[i])
+            ERR2(PF_CHECKIN_PARAM(in_data, &p[i]));
+    }
+    return err;
+}
+#endif
 
 // "Blur Amount" view: the engine's own per-pixel amount.
 inline float EngineBlurAmount(const lenscore::Params& p, const float* mapValue)
@@ -327,6 +744,150 @@ inline float EngineBlurAmount(const lenscore::Params& p, const float* mapValue)
     return mapValue ? lenscore::blurAmount(*mapValue, p) : 1.f;
 }
 
+#ifndef OB_KANTAN
+// Lens Preset popup -> UI values. Popup value 1 = "Custom" (no change), 2.. = kLensPresets[v-2].
+// Only Iris / Lens Character / Falloff & Glow / highlight params are written (never Radius, map,
+// View, Highlight Rolloff, the highlight layer, film effects, the classic v1 gain or Linear Light).
+bool ApplyPresetToParams(int popupValue, PF_ParamDef* params[])
+{
+    lenscore::Params q;
+    if (!lenscore::applyLensPreset(popupValue - 2, q))
+        return false;
+    auto setF = [&](int i, double v) {
+        params[i]->u.fs_d.value = v;
+        params[i]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    };
+    params[OB_BLADES]->u.sd.value = q.blades;
+    params[OB_BLADES]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    params[OB_ROTATION]->u.ad.value = (PF_Fixed)std::lround(q.rotationDeg * 65536.0);
+    params[OB_ROTATION]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    setF(OB_CURVATURE, q.bladeCurvature * 100.0);
+    setF(OB_CORNER, q.cornerRounding * 100.0);
+    setF(OB_ANAMORPHIC, q.anamorphic);
+    setF(OB_CATEYE, q.catEye * 100.0);
+    setF(OB_OBSTRUCTION, q.obstruction * 100.0);
+    setF(OB_EDGE_RING, q.edgeRing * 100.0);
+    setF(OB_RING_WIDTH, q.ringWidth * 100.0);
+    setF(OB_SOFTNESS, q.edgeSoftness * 100.0);
+    setF(OB_APOD, q.apodization * 100.0);
+    setF(OB_CORE, q.coreWeight * 100.0);
+    setF(OB_SA, q.sphericalAberration * 100.0);
+    setF(OB_ONION, q.onionRings * 100.0);
+    setF(OB_ONION_COUNT, q.onionCount);
+    setF(OB_CHROMA, q.chromaFringe * 100.0);
+    setF(OB_VIGNETTE, q.vignetting * 100.0);
+    setF(OB_GLOW, q.glow * 100.0);
+    setF(OB_GLOW_SIZE, q.glowSize * 100.0);
+    setF(OB_FRINGE_TINT, q.fringeTint * 100.0);
+    setF(OB_HL_BOOST, q.highlightBoost);
+    setF(OB_HL_KNEE, q.highlightKnee);
+    setF(OB_HL_CURVE, q.highlightCurve);
+    setF(OB_HL_SEL, q.highlightSelectivity * 100.0);
+    setF(OB_HL_DETAIL, q.detailSize);
+    setF(OB_HL_DETAIL_MIN, q.detailMin);
+    setF(OB_HL_WHITE, q.whiteProtection * 100.0);
+    setF(OB_HL_DOTS, q.dotsOnly * 100.0);
+    setF(OB_HL_SAT, q.highlightSaturation * 100.0);
+    return true;
+}
+
+// Aberration Style popup -> LA shape/colour params (never the amount). Value 1 = "Custom".
+bool ApplyAberrationStyleToParams(int popupValue, PF_ParamDef* params[])
+{
+    lenscore::Params q;
+    if (!lenscore::applyAberrationStyle(popupValue - 2, q))
+        return false;
+    auto setF = [&](int i, double v) {
+        params[i]->u.fs_d.value = v;
+        params[i]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    };
+    auto enc = [](float v) {
+        return (A_u_char)std::lround(255.0 * std::pow(std::min(1.0f, std::max(0.0f, v)), 1.0 / kDisplayGamma));
+    };
+    params[OB_LA_MODE]->u.pd.value = (A_short)(q.laMode == 1   ? LA_SIDE_BRIGHT
+                                               : q.laMode == 2 ? LA_SIDE_BOTH
+                                               : q.laMode == 3 ? LA_SIDE_RIM
+                                               : q.laMode == 4 ? LA_SIDE_DRIFT : LA_SIDE_DARK);
+    params[OB_LA_MODE]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    setF(OB_LA_WIDTH, q.laWidth * 100.0);
+    setF(OB_LA_THRESHOLD, q.laThreshold);
+    setF(OB_LA_CURVE, q.laCurve);
+    setF(OB_LA_HUE, q.laHueShift * 100.0);
+    params[OB_LA_TINT]->u.cd.value.red = enc(q.laTint[0]);
+    params[OB_LA_TINT]->u.cd.value.green = enc(q.laTint[1]);
+    params[OB_LA_TINT]->u.cd.value.blue = enc(q.laTint[2]);
+    params[OB_LA_TINT]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    setF(OB_LA_SCALE, q.laContrastScale * 100.0);
+    setF(OB_LA_LINE, q.laLineProtect * 100.0);
+    setF(OB_LA_SHARP, q.laSharpness * 100.0);
+    setF(OB_LA_BRIGHTCOL, q.laBrightColor * 100.0);
+    setF(OB_LA_BLUR, q.laBlur * 100.0);
+    setF(OB_LA_COMPLEMENT, q.laComplement * 100.0);
+    setF(OB_LA_MAPSOFT, q.laMapSoftness * 100.0);
+    setF(OB_LA_PRESERVE, q.laPreserve * 100.0);
+    int fringe = 1;  // the Fringe Color entry whose channel shifts the style uses
+    for (int i = 0; i < lenscore::kFringeColorCount; ++i)
+    {
+        const float* s = lenscore::kFringeColors[i].shift;
+        if (s[0] == q.laShift[0] && s[1] == q.laShift[1] && s[2] == q.laShift[2])
+            fringe = i + 1;
+    }
+    params[OB_LA_FRINGE]->u.pd.value = (A_short)fringe;
+    params[OB_LA_FRINGE]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    params[OB_LA_DIR]->u.pd.value = (A_short)(q.laShiftDir == 1 ? LA_DIR_ADVANCE : LA_DIR_RETREAT);
+    params[OB_LA_DIR]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    return true;
+}
+
+// Grain Stock popup -> grain params (amount included). Value 1 = "Custom".
+bool ApplyGrainStockToParams(int popupValue, PF_ParamDef* params[])
+{
+    lenscore::Params q;
+    if (!lenscore::applyGrainStock(popupValue - 2, q))
+        return false;
+    auto setF = [&](int i, double v) {
+        params[i]->u.fs_d.value = v;
+        params[i]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+    };
+    setF(OB_GRAIN_AMOUNT, q.grain * 100.0);
+    setF(OB_GRAIN_SIZE, q.grainSize);
+    setF(OB_GRAIN_SOFT, q.grainSoftness * 100.0);
+    setF(OB_GRAIN_COLOR, q.grainColor * 100.0);
+    setF(OB_GRAIN_TONE, q.grainTone * 100.0);
+    return true;
+}
+
+// v2.2 (A11): params written by the supervised popups. Editing one of them by hand resets its popup to
+// "Custom", so the popup never claims a preset the controls no longer match (and choosing the same
+// preset again re-applies it). Indices for USER_CHANGED_PARAM; disk IDs for PF_ParamFlag_SUPERVISE.
+const int kPresetTargets[] = {OB_BLADES, OB_ROTATION, OB_CURVATURE, OB_CORNER, OB_ANAMORPHIC, OB_CATEYE, OB_OBSTRUCTION,
+                              OB_EDGE_RING, OB_RING_WIDTH, OB_SOFTNESS, OB_APOD, OB_CORE, OB_SA, OB_ONION, OB_ONION_COUNT,
+                              OB_CHROMA, OB_VIGNETTE, OB_GLOW, OB_GLOW_SIZE, OB_FRINGE_TINT, OB_HL_BOOST, OB_HL_KNEE,
+                              OB_HL_CURVE, OB_HL_SEL, OB_HL_DETAIL, OB_HL_DETAIL_MIN, OB_HL_WHITE, OB_HL_DOTS, OB_HL_SAT};
+const int kStyleTargets[] = {OB_LA_MODE, OB_LA_WIDTH, OB_LA_THRESHOLD, OB_LA_CURVE, OB_LA_HUE, OB_LA_TINT, OB_LA_SCALE,
+                             OB_LA_LINE, OB_LA_SHARP, OB_LA_BRIGHTCOL, OB_LA_BLUR, OB_LA_COMPLEMENT, OB_LA_MAPSOFT,
+                             OB_LA_PRESERVE, OB_LA_FRINGE, OB_LA_DIR};
+const int kStockTargets[] = {OB_GRAIN_AMOUNT, OB_GRAIN_SIZE, OB_GRAIN_SOFT, OB_GRAIN_COLOR, OB_GRAIN_TONE};
+const A_long kSupervisedDisk[] = {
+    DISK_BLADES, DISK_ROTATION, DISK_CURVATURE, DISK_CORNER, DISK_ANAMORPHIC, DISK_CATEYE, DISK_OBSTRUCTION,
+    DISK_EDGE_RING, DISK_RING_WIDTH, DISK_SOFTNESS, DISK_APOD, DISK_CORE, DISK_SA, DISK_ONION, DISK_ONION_COUNT,
+    DISK_CHROMA, DISK_VIGNETTE, DISK_GLOW, DISK_GLOW_SIZE, DISK_FRINGE_TINT, DISK_HL_BOOST, DISK_HL_KNEE,
+    DISK_HL_CURVE, DISK_HL_SEL, DISK_HL_DETAIL, DISK_HL_DETAIL_MIN, DISK_HL_WHITE, DISK_HL_DOTS, DISK_HL_SAT,
+    DISK_LA_MODE, DISK_LA_WIDTH, DISK_LA_THRESHOLD, DISK_LA_CURVE, DISK_LA_HUE, DISK_LA_TINT, DISK_LA_SCALE,
+    DISK_LA_LINE, DISK_LA_SHARP, DISK_LA_BRIGHTCOL, DISK_LA_BLUR, DISK_LA_COMPLEMENT, DISK_LA_MAPSOFT,
+    DISK_LA_PRESERVE, DISK_LA_FRINGE, DISK_LA_DIR,
+    DISK_GRAIN_AMOUNT, DISK_GRAIN_SIZE, DISK_GRAIN_SOFT, DISK_GRAIN_COLOR, DISK_GRAIN_TONE};
+template <size_t N>
+inline bool Contains(const int (&a)[N], int v)
+{
+    return std::find(a, a + N, v) != a + N;
+}
+inline PF_ParamFlags SupFlag(A_long diskId)
+{
+    const size_t n = sizeof(kSupervisedDisk) / sizeof(kSupervisedDisk[0]);
+    return std::find(kSupervisedDisk, kSupervisedDisk + n, diskId) != kSupervisedDisk + n ? PF_ParamFlag_SUPERVISE : 0;
+}
+#else
 // Kantan: the popups write nothing (the links read the preset tables at render time), so nothing is
 // supervised and there is no "Custom" state. A picker click only sets its popup.
 inline PF_ParamFlags SupFlag(A_long)
@@ -337,6 +898,7 @@ bool KantanPopupOnly(int, PF_ParamDef*[])
 {
     return true;
 }
+#endif
 
 struct AbortCtx
 {
@@ -1358,15 +1920,23 @@ PF_Err QueryDynamicFlags(PF_InData* in_data, PF_OutData* out_data)
     ERR(PF_CHECKOUT_PARAM(in_data, OB_GRAIN_AMOUNT, in_data->current_time, in_data->time_step, in_data->time_scale, &amount));
     if (!err)
         outA = true;
+#ifdef OB_KANTAN
     // Kantan: grain always animates (no Animate checkbox); Grain is 0..200 % of the stock's amount
     const int animIdx = OB_GRAIN_AMOUNT;
+#else
+    const int animIdx = OB_GRAIN_ANIMATE;
+#endif
     ERR(PF_CHECKOUT_PARAM(in_data, animIdx, in_data->current_time, in_data->time_step, in_data->time_scale, &animate));
     if (!err)
         outB = true;
     if (!err)
     {
         const bool amountOn = amount.u.fs_d.value > 0 || ParamMayVary(in_data, OB_GRAIN_AMOUNT);
+#ifdef OB_KANTAN
         const bool animOn = amountOn;
+#else
+        const bool animOn = amountOn && (animate.u.bd.value || ParamMayVary(in_data, OB_GRAIN_ANIMATE));
+#endif
         if (amountOn && animOn)
             out_data->out_flags |= PF_OutFlag_NON_PARAM_VARY;
         else
@@ -1532,7 +2102,490 @@ PF_Err AddColor(PF_InData* in_data, const char* name, const float lin[3], A_long
     return PF_ADD_PARAM(in_data, -1, &def);
 }
 
+#ifndef OB_KANTAN
+PF_Err ParamsSetup(PF_InData* in_data, PF_OutData* out_data)
+{
+    PF_ParamDef def;
+    PF_Err err = PF_Err_NONE;
+    const PF_ValueDisplayFlags PCT = PF_ValueDisplayFlag_PERCENT, NONE = PF_ValueDisplayFlag_NONE;
+    const lenscore::Params def0;  // engine defaults (film effects etc.)
+
+    // New instances start as the first preset (the flagship), so the effect looks right
+    // before any preset is chosen. Defaults are taken from the shared preset table.
+    lenscore::Params dp;
+    lenscore::applyLensPreset(0, dp);
+
+    // Popup names built once from the shared preset table (immutable after first use).
+    static const std::string presetNames = [] {
+        std::string s = obs::T("Custom");
+        for (int i = 0; i < lenscore::kLensPresetCount; ++i)
+        {
+            s += "|";
+            s += obs::T(lenscore::kLensPresets[i].ui);
+        }
+        return s;
+    }();
+    AEFX_CLR_STRUCT(def);
+    def.param_type = PF_Param_POPUP;
+    PF_STRNNCPY(def.PF_DEF_NAME, obs::T("Lens Preset"), sizeof(def.PF_DEF_NAME));
+    def.u.pd.num_choices = (A_short)(lenscore::kLensPresetCount + 1);
+    def.u.pd.dephault = 2;  // first preset for new instances
+    def.u.pd.value = 1;     // "Custom" for projects saved before this param existed
+    def.u.pd.u.namesptr = presetNames.c_str();
+    def.flags = PF_ParamFlag_SUPERVISE | PF_ParamFlag_CANNOT_TIME_VARY | PF_ParamFlag_USE_VALUE_FOR_OLD_PROJECTS;
+    def.uu.id = DISK_PRESET;
+    if ((err = PF_ADD_PARAM(in_data, -1, &def)) != PF_Err_NONE)
+        return err;
+    if ((err = AddPicker(in_data, obs::T("Preset Thumbnails"), obthumb::LENS, DISK_LENS_PICKER, false)))
+        return err;
+
+    // Quality (v2.1, replaces the v2.0 alpha/beta editions). Old projects get Standard (= v1.2 engine).
+    // supervised: the Best group is enabled / greyed immediately (USER_CHANGED_PARAM), not only on
+    // the next UPDATE_PARAMS_UI
+    if ((err = AddPopup(in_data, obs::T("Quality"), 3, QUALITY_STANDARD, obs::T("Fast (Alpha)|Standard|Best (Beta)"), DISK_QUALITY, 0,
+                        PF_ParamFlag_SUPERVISE)))
+        return err;
+    // v2.4: Auto = the GPU blur for Fast / Standard when worth it (CPU otherwise, and on any GPU error);
+    // Off = CPU only. Part of the render (AE's cache sees it). Old projects get Auto (the new default).
+    if ((err = AddPopup(in_data, obs::T("Use GPU"), 2, obgpuw::USE_AUTO, obs::T("Auto|Off (CPU only)"), DISK_USE_GPU)))
+        return err;
+
+    // View: the two highlight views are the tuning tools for "what becomes a ball".
+    if ((err = AddPopup(in_data, obs::T("View"), 4, VIEW_RESULT, obs::T("Result|Blur Amount|Highlight Source|Highlights Only"), DISK_VIEW)))
+        return err;
+
+    PF_ADD_FLOAT_SLIDERX(obs::T("Radius"), 0, 500, 0, 100, 20, 1, PF_ValueDisplayFlag_NONE, 0, DISK_RADIUS);
+
+    PF_ADD_TOPICX(obs::T("Blur Map"), 0, DISK_MAP_GROUP_START);
+    AEFX_CLR_STRUCT(def);
+    // Not "Blur Map": the group is already called that, and duplicate names make
+    // effect("Optic Bokeh")("Blur Map") in expressions/scripts resolve to the group.
+    PF_ADD_LAYER(obs::T("Map Layer"), PF_LayerDefault_NONE, DISK_MAP_LAYER);
+    PF_ADD_POPUPX(obs::T("Map Channel"), 5, CH_LUMINANCE, obs::T("Luminance|Red|Green|Blue|Alpha"), 0, DISK_MAP_CHANNEL);
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_CHECKBOX(obs::T("Invert Map"), "", false, 0, DISK_MAP_INVERT);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Focus"), 0, 100, 0, 100, 0, 1, PF_ValueDisplayFlag_PERCENT, 0, DISK_FOCUS);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Map Scale"), 0, 20, 0, 4, 1, 2, PF_ValueDisplayFlag_NONE, 0, DISK_MAP_SCALE);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Map Gamma"), 0.1, 10, 0.2, 5, 1, 2, PF_ValueDisplayFlag_NONE, 0, DISK_MAP_GAMMA);
+    // v2.3 map features (ob_mapx.h). Defaults = the earlier output exactly (old projects get them too).
+    if ((err = AddMapFeature(in_data, MF_RANGE, DISK_FOCUS_RANGE)) || (err = AddMapFeature(in_data, MF_FRONT, DISK_FRONT_BLUR)) ||
+        (err = AddMapFeature(in_data, MF_BACK, DISK_BACK_BLUR)) || (err = AddMapFeature(in_data, MF_BLUR, DISK_MAP_BLUR)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_CHECKBOX(obs::T("Focus at Point"), "", false, 0, DISK_FOCUS_POINT_ON);
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_POINT(obs::T("Focus Point"), 50, 50, 0, DISK_FOCUS_POINT);
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_MAP_GROUP_END);
+
+    // Existing (v1) params: changing a default only affects newly applied effects; saved projects
+    // always carry their own values.
+    PF_ADD_TOPICX(obs::T("Iris"), 0, DISK_IRIS_GROUP_START);
+    AEFX_CLR_STRUCT(def);
+    // 0 = circle; 1 and 2 are also treated as circle by the engine.
+    def.flags = SupFlag(DISK_BLADES);
+    PF_ADD_SLIDER(obs::T("Blades"), 0, 16, 0, 16, dp.blades, DISK_BLADES);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Blade Curvature"), 0, 100, 0, 100, dp.bladeCurvature * 100.0, 1, PCT, SupFlag(DISK_CURVATURE), DISK_CURVATURE);
+    if ((err = AddFloat(in_data, obs::T("Corner Rounding"), 0, 100, 0, 100, dp.cornerRounding * 100.0, 0, 1, PCT, DISK_CORNER)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    def.flags = SupFlag(DISK_ROTATION);
+    PF_ADD_ANGLE(obs::T("Rotation"), 0, DISK_ROTATION);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Anamorphic"), 0.25, 4, 0.25, 4, 1, 2, NONE, SupFlag(DISK_ANAMORPHIC), DISK_ANAMORPHIC);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Cat Eye"), 0, 100, 0, 100, dp.catEye * 100.0, 1, PCT, SupFlag(DISK_CATEYE), DISK_CATEYE);
+    if ((err = AddFloat(in_data, obs::T("Obstruction"), 0, 90, 0, 90, dp.obstruction * 100.0, 0, 1, PCT, DISK_OBSTRUCTION)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_IRIS_GROUP_END);
+
+    PF_ADD_TOPICX(obs::T("Lens Character"), 0, DISK_LENS_GROUP_START);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Edge Ring"), -100, 100, -100, 100, dp.edgeRing * 100.0, 1, PCT, SupFlag(DISK_EDGE_RING), DISK_EDGE_RING);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Ring Width"), 0, 100, 0, 100, dp.ringWidth * 100.0, 1, PCT, SupFlag(DISK_RING_WIDTH), DISK_RING_WIDTH);
+    if ((err = AddFloat(in_data, obs::T("Edge Softness"), 0, 100, 0, 100, dp.edgeSoftness * 100.0, 0, 1, PCT, DISK_SOFTNESS)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Apodization"), 0, 100, 0, 100, dp.apodization * 100.0, 0, 1, PCT, DISK_APOD)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Core Brightness"), -100, 100, -100, 100, dp.coreWeight * 100.0, 0, 1, PCT, DISK_CORE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Spherical Aberration"), -100, 100, -100, 100, dp.sphericalAberration * 100.0, 0, 1, PCT, DISK_SA)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Onion Rings"), 0, 100, 0, 100, dp.onionRings * 100.0, 0, 1, PCT, DISK_ONION)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Onion Ring Count"), 1, 10, 1, 10, dp.onionCount, 4, 1, NONE, DISK_ONION_COUNT)))
+        return err;
+    // negative values swap the fringe colours
+    PF_ADD_FLOAT_SLIDERX(obs::T("Chroma Fringe"), -100, 100, -100, 100, dp.chromaFringe * 100.0, 1, PCT, SupFlag(DISK_CHROMA), DISK_CHROMA);
+    // 0% = red/blue (v1), 100% = green behind / magenta in front (classic longitudinal CA)
+    if ((err = AddFloat(in_data, obs::T("Fringe Tint"), 0, 100, 0, 100, dp.fringeTint * 100.0, 0, 1, PCT, DISK_FRINGE_TINT)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_LENS_GROUP_END);
+
+    PF_ADD_TOPICX(obs::T("Falloff & Glow"), PF_ParamFlag_START_COLLAPSED, DISK_FALLOFF_GROUP_START);
+    if ((err = AddFloat(in_data, obs::T("Vignetting"), 0, 100, 0, 100, dp.vignetting * 100.0, 0, 1, PCT, DISK_VIGNETTE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Veiling Glow"), 0, 100, 0, 50, dp.glow * 100.0, 0, 1, PCT, DISK_GLOW)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Glow Size"), 0.5, 25, 0.5, 15, dp.glowSize * 100.0, 4, 1, PCT, DISK_GLOW_SIZE)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_FALLOFF_GROUP_END);
+
+    // One highlight model: luminance-true expansion of bright pixels (inverse tone map), controls
+    // for WHAT becomes a ball (size window, white protection, dots vs lines, a highlight layer) and
+    // an output rolloff. The v1 gain lives in a sub-group. Tune with View = Highlight Source.
+    PF_ADD_TOPICX(obs::T("Highlights"), 0, DISK_HL_GROUP_START);
+    if ((err = AddFloat(in_data, obs::T("Highlight Boost"), 0, 20, 0, 4, dp.highlightBoost, 0, 2, NONE, DISK_HL_BOOST)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Highlight Knee"), 0, 0.97, 0, 0.95, dp.highlightKnee, 0.45, 2, NONE, DISK_HL_KNEE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Highlight Curve"), 1, 8, 1, 4, dp.highlightCurve, 2, 2, NONE, DISK_HL_CURVE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Size Selectivity"), 0, 100, 0, 100, dp.highlightSelectivity * 100.0, 85, 1, PCT, DISK_HL_SEL)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Detail Size"), 1, 200, 2, 40, dp.detailSize, 8, 1, NONE, DISK_HL_DETAIL)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Min Detail Size"), 0, 100, 0, 20, dp.detailMin, 0, 1, NONE, DISK_HL_DETAIL_MIN)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("White Protection"), 0, 100, 0, 100, dp.whiteProtection * 100.0, 0, 1, PCT, DISK_HL_WHITE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Dots vs Lines"), 0, 100, 0, 100, dp.dotsOnly * 100.0, 0, 1, PCT, DISK_HL_DOTS)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Highlight Saturation"), 0, 100, 0, 100, dp.highlightSaturation * 100.0, 0, 1, PCT, DISK_HL_SAT)))
+        return err;
+    if ((err = AddPopup(in_data, obs::T("Highlight Source"), 3, SRC_AUTO, obs::T("Automatic|Highlight Layer Only|Automatic x Highlight Layer"),
+                        DISK_HL_SOURCE)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_LAYER(obs::T("Highlight Layer"), PF_LayerDefault_NONE, DISK_HL_LAYER);
+    if ((err = AddPopup(in_data, obs::T("Highlight Layer Channel"), 5, CH_LUMINANCE, obs::T("Luminance|Red|Green|Blue|Alpha"),
+                        DISK_HL_LAYER_CHANNEL)))
+        return err;
+    // Output shoulder for 8/16-bpc delivery; 0 = linear (HDR / 32-bpc workflows). Not set by presets.
+    if ((err = AddFloat(in_data, obs::T("Highlight Rolloff"), 0, 100, 0, 100, 50, 0, 1, PCT, DISK_HL_ROLLOFF)))
+        return err;
+    PF_ADD_TOPICX(obs::T("Classic Gain (v1)"), PF_ParamFlag_START_COLLAPSED, DISK_CLASSIC_GROUP_START);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Classic Threshold"), 0, 10, 0, 2, 1, 2, NONE, 0, DISK_HL_THRESHOLD);
+    PF_ADD_FLOAT_SLIDERX(obs::T("Classic Gain"), 0, 100, 0, 10, 0, 2, NONE, 0, DISK_HL_GAIN);
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_CLASSIC_GROUP_END);
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_HL_GROUP_END);
+
+    // Film effects on the final image (in-focus pixels included). Off by default.
+    PF_ADD_TOPICX(obs::T("Halation & Aberration"), PF_ParamFlag_START_COLLAPSED, DISK_FILM_GROUP_START);
+    if ((err = AddFloat(in_data, obs::T("Halation"), 0, 200, 0, 100, 0, 0, 1, PCT, DISK_HAL_AMOUNT)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Halation Size"), 0.1, 20, 0.2, 5, def0.halationSize * 100.0, def0.halationSize * 100.0, 2, PCT,
+                        DISK_HAL_SIZE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Halation Threshold"), 0, 4, 0, 1.5, def0.halationThreshold, def0.halationThreshold, 2, NONE,
+                        DISK_HAL_THRESHOLD)))
+        return err;
+    // stops above the local scene level: only lights that are bright for their surroundings halate
+    if ((err = AddFloat(in_data, obs::T("Halation Above Scene"), -2, 6, 0, 4, def0.halationRelative, def0.halationRelative, 2, NONE,
+                        DISK_HAL_RELATIVE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Halation Softness"), 0, 100, 0, 100, def0.halationSoftness * 100.0,
+                        def0.halationSoftness * 100.0, 1, PCT, DISK_HAL_SOFTNESS)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Halation Rim"), 0, 100, 0, 100, def0.halationRim * 100.0, def0.halationRim * 100.0, 1, PCT,
+                        DISK_HAL_RIM)))
+        return err;
+    if ((err = AddColor(in_data, obs::T("Halation Tint"), def0.halationTint, DISK_HAL_TINT)))
+        return err;
+    // Aberration Style: a starting point that writes every shape/colour param below (not the amount),
+    // supervised like Lens Preset. 1 = Custom (no change).
+    static const std::string styleNames = [] {
+        std::string s = obs::T("Custom");
+        for (int i = 0; i < lenscore::kAberrationStyleCount; ++i)
+        {
+            s += "|";
+            s += obs::T(lenscore::kAberrationStyles[i].ui);
+        }
+        return s;
+    }();
+    AEFX_CLR_STRUCT(def);
+    def.param_type = PF_Param_POPUP;
+    PF_STRNNCPY(def.PF_DEF_NAME, obs::T("Aberration Style"), sizeof(def.PF_DEF_NAME));
+    def.u.pd.num_choices = (A_short)(lenscore::kAberrationStyleCount + 1);
+    def.u.pd.dephault = 1;
+    def.u.pd.value = 1;
+    def.u.pd.u.namesptr = styleNames.c_str();
+    def.flags = PF_ParamFlag_SUPERVISE | PF_ParamFlag_CANNOT_TIME_VARY;
+    def.uu.id = DISK_LA_STYLE;
+    if ((err = PF_ADD_PARAM(in_data, -1, &def)) != PF_Err_NONE)
+        return err;
+    if ((err = AddPicker(in_data, obs::T("Style Thumbnails"), obthumb::STYLE, DISK_STYLE_PICKER, true)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Luminance Aberration"), 0, 200, 0, 100, 0, 0, 1, PCT, DISK_LA_AMOUNT)))
+        return err;
+    if ((err = AddPopup(in_data, obs::T("Aberration Side"), 5, LA_SIDE_DARK,
+                        obs::T("Bleed into Dark Side|Tint Bright Side|Both|Drawn Rim|Channel Drift"), DISK_LA_MODE)))
+        return err;
+    // Aberration Width: bleed sigma (sides 1-3) / rim width (Contrast Rim), % of the diagonal
+    if ((err = AddFloat(in_data, obs::T("Aberration Width"), 0.01, 10, 0.02, 2, def0.laWidth * 100.0, def0.laWidth * 100.0, 3, PCT,
+                        DISK_LA_WIDTH)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Aberration Threshold"), 0, 8, 0, 5, def0.laThreshold, def0.laThreshold, 2, NONE,
+                        DISK_LA_THRESHOLD)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Aberration Curve"), 0.25, 4, 0.25, 3, def0.laCurve, def0.laCurve, 2, NONE, DISK_LA_CURVE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Hue by Contrast"), 0, 100, 0, 100, def0.laHueShift * 100.0, def0.laHueShift * 100.0, 1, PCT,
+                        DISK_LA_HUE)))
+        return err;
+    if ((err = AddColor(in_data, obs::T("Aberration Color"), def0.laTint, DISK_LA_TINT)))
+        return err;
+    // Contrast Rim only
+    if ((err = AddFloat(in_data, obs::T("Rim Contrast Scale"), 0.05, 5, 0.1, 2, def0.laContrastScale * 100.0,
+                        def0.laContrastScale * 100.0, 2, PCT, DISK_LA_SCALE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Rim Line Protection"), 0, 2, 0, 0.6, def0.laLineProtect * 100.0, def0.laLineProtect * 100.0,
+                        3, PCT, DISK_LA_LINE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Rim Sharpness"), 0, 100, 0, 100, def0.laSharpness * 100.0, def0.laSharpness * 100.0, 1, PCT,
+                        DISK_LA_SHARP)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Rim Color from Bright Side"), 0, 100, 0, 100, def0.laBrightColor * 100.0,
+                        def0.laBrightColor * 100.0, 1, PCT, DISK_LA_BRIGHTCOL)))
+        return err;
+    // Drawn Rim: 0 = the crisp line; > 0 = a soft tinted spill (optical fringe)
+    if ((err = AddFloat(in_data, obs::T("Rim Blur"), 0, 2, 0, 0.5, def0.laBlur * 100.0, def0.laBlur * 100.0, 3, PCT, DISK_LA_BLUR)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Rim Complement"), 0, 100, 0, 100, def0.laComplement * 100.0, def0.laComplement * 100.0, 1,
+                        PCT, DISK_LA_COMPLEMENT)))
+        return err;
+    // Channel Drift (the per-channel vector-blur recipe)
+    {
+        static const std::string fringeNames = [] {
+            std::string s;
+            for (int i = 0; i < lenscore::kFringeColorCount; ++i)
+            {
+                if (i)
+                    s += "|";
+                s += lenscore::kFringeColors[i].ui;
+            }
+            return s;
+        }();
+        if ((err = AddPopup(in_data, obs::T("Fringe Color"), lenscore::kFringeColorCount, 1, obs::T(fringeNames.c_str()), DISK_LA_FRINGE)))
+            return err;
+    }
+    if ((err = AddPopup(in_data, obs::T("Fringe Side"), 2, LA_DIR_RETREAT, obs::T("Bright Edge (channels retreat)|Dark Edge (channels advance)"),
+                        DISK_LA_DIR)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Map Softness"), 0, 2, 0, 0.6, def0.laMapSoftness * 100.0, def0.laMapSoftness * 100.0, 3, PCT,
+                        DISK_LA_MAPSOFT)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Preserve Detail"), 0, 100, 0, 100, def0.laPreserve * 100.0, def0.laPreserve * 100.0, 1, PCT,
+                        DISK_LA_PRESERVE)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_FILM_GROUP_END);
+
+    // Film grain on the final image (in-focus pixels included). Off by default.
+    PF_ADD_TOPICX(obs::T("Grain"), PF_ParamFlag_START_COLLAPSED, DISK_GRAIN_GROUP_START);
+    {
+        static const std::string stockNames = [] {
+            std::string s = obs::T("Custom");
+            for (int i = 0; i < lenscore::kGrainStockCount; ++i)
+            {
+                s += "|";
+                s += obs::T(lenscore::kGrainStocks[i].ui);
+            }
+            return s;
+        }();
+        AEFX_CLR_STRUCT(def);
+        def.param_type = PF_Param_POPUP;
+        PF_STRNNCPY(def.PF_DEF_NAME, obs::T("Grain Stock"), sizeof(def.PF_DEF_NAME));
+        def.u.pd.num_choices = (A_short)(lenscore::kGrainStockCount + 1);
+        def.u.pd.dephault = 1;
+        def.u.pd.value = 1;
+        def.u.pd.u.namesptr = stockNames.c_str();
+        def.flags = PF_ParamFlag_SUPERVISE | PF_ParamFlag_CANNOT_TIME_VARY;
+        def.uu.id = DISK_GRAIN_STOCK;
+        if ((err = PF_ADD_PARAM(in_data, -1, &def)) != PF_Err_NONE)
+            return err;
+    }
+    if ((err = AddPicker(in_data, obs::T("Stock Thumbnails"), obthumb::STOCK, DISK_STOCK_PICKER, true)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Grain Amount"), 0, 200, 0, 100, 0, 0, 1, PCT, DISK_GRAIN_AMOUNT)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Grain Size"), 0.3, 8, 0.3, 4, def0.grainSize, def0.grainSize, 2, NONE, DISK_GRAIN_SIZE)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Grain Softness"), 0, 100, 0, 100, def0.grainSoftness * 100.0, def0.grainSoftness * 100.0, 1,
+                        PCT, DISK_GRAIN_SOFT)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Grain Color"), 0, 100, 0, 100, def0.grainColor * 100.0, def0.grainColor * 100.0, 1, PCT,
+                        DISK_GRAIN_COLOR)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Grain Tone Response"), 0, 100, 0, 100, def0.grainTone * 100.0, def0.grainTone * 100.0, 1, PCT,
+                        DISK_GRAIN_TONE)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_CHECKBOX(obs::T("Animate Grain"), "", true, 0, DISK_GRAIN_ANIMATE);
+    if ((err = AddInt(in_data, obs::T("Grain Hold Frames"), 1, 24, 1, DISK_GRAIN_HOLD)))
+        return err;
+    if ((err = AddInt(in_data, obs::T("Grain Seed"), 0, 9999, 0, DISK_GRAIN_SEED)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_GRAIN_GROUP_END);
+
+    // Reserved for the Best quality engine (see BlurStage; no effect yet). Enabled only while
+    // Quality = Best (UpdateParamsUI); disabled at setup because the default is Standard.
+    const PF_ParamUIFlags hqUi = PF_PUI_DISABLED;
+    PF_ADD_TOPICX(obs::T("Best Quality (Beta)"), PF_ParamFlag_START_COLLAPSED, DISK_HQ_GROUP_START);
+    if ((err = AddFloat(in_data, obs::T("Disc Texture Amount"), 0, 200, 0, 100, 0, 0, 1, PCT, DISK_HQ_TEX_AMOUNT, hqUi)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Texture Scale"), 0.25, 4, 0.25, 4, 1, 1, 2, NONE, DISK_HQ_TEX_SCALE, hqUi)))
+        return err;
+    // order = lenshq::TextureType
+    if ((err = AddPopup(in_data, obs::T("Texture Type"), 6, 1, obs::T("Mixed|Fine Grain|Dust|Wipe Streaks|Polishing Marks|Soap Bubble"),
+                        DISK_HQ_TEX_TYPE, hqUi)))
+        return err;
+    if ((err = AddInt(in_data, obs::T("Texture Seed"), 0, 9999, 0, DISK_HQ_TEX_SEED, hqUi)))
+        return err;
+    // 0 = Auto (spectral), 1-2 = RGB three-band (like Standard), >= 3 = that many wavelengths
+    if ((err = AddInt(in_data, obs::T("Spectral Samples (0=Auto)"), 0, 32, 0, DISK_HQ_SPECTRAL, hqUi)))
+        return err;
+    if ((err = AddFloat(in_data, obs::T("Lateral Chromatic Aberration"), -100, 100, -100, 100, 0, 0, 1, PCT, DISK_HQ_LATERAL_CA, hqUi)))
+        return err;
+    AEFX_CLR_STRUCT(def);
+    PF_END_TOPIC(DISK_HQ_GROUP_END);
+
+    AEFX_CLR_STRUCT(def);
+    PF_ADD_CHECKBOX(obs::T("Work in Linear Light"), "", true, 0, DISK_LINEAR);
+    // v2.2: what the input pixels are when Work in Linear Light is on. 2.2 = decode with gamma 2.2
+    // (v2.1 behaviour, old projects); Linear = the working space is already linear (Linearize Working
+    // Space, OCIO scene-linear): no decode / encode; Auto = see InputIsLinear (currently = 2.2).
+    if ((err = AddPopupOld(in_data, obs::T("Input Gamma"), 3, GAMMA_AUTO, GAMMA_22, obs::T("Auto|Gamma 2.2|Linear"), DISK_INPUT_GAMMA)))
+        return err;
+    // v2.2 Edge Behavior (like AE's own blurs): Spread = the blur spreads beyond the layer bounds;
+    // Repeat Edge = edge pixels are repeated and the output stays inside the layer; Clip to Layer =
+    // transparent outside, output clipped to the layer (v1.2; old projects).
+    // v2.3 (owner decision): NEW instances and Reset default to Repeat Edge, so a layer that fills the
+    // frame never fades out at its edges. Only the default (dephault) changes: AE stores the popup value
+    // of every saved instance, so v2.2.x instances saved with Spread stay Spread; projects that predate
+    // this param still get Clip to Layer through USE_VALUE_FOR_OLD_PROJECTS (u.pd.value), and a v2.1
+    // instance with the hidden Repeat Edge Pixels checkbox on still renders Repeat Edge.
+    if ((err = AddPopupOld(in_data, obs::T("Edge Behavior"), 3, EDGE_REPEAT, EDGE_CLIP, obs::T("Spread|Repeat Edge|Clip to Layer"),
+                           DISK_EDGE_MODE, PF_ParamFlag_SUPERVISE)))
+        return err;
+    // v2.1 checkbox, kept (hidden) so v2.1 projects with it on still render Repeat Edge. Changing
+    // Edge Behavior clears it (UserChangedParam).
+    AEFX_CLR_STRUCT(def);
+    def.ui_flags = PF_PUI_INVISIBLE;
+    PF_ADD_CHECKBOX(obs::T("Repeat Edge Pixels"), "", false, 0, DISK_REPEAT_EDGE);
+    // Hidden render version (lenscore Params.renderVersion): 1 for projects saved before v2.2 (their
+    // highlights / widths / drift / rolloff render exactly as in v2.1), 2 for new instances.
+    {
+        AEFX_CLR_STRUCT(def);
+        def.param_type = PF_Param_SLIDER;
+        PF_STRNNCPY(def.PF_DEF_NAME, obs::T("Render Version"), sizeof(def.PF_DEF_NAME));
+        def.u.sd.valid_min = def.u.sd.slider_min = 1;
+        def.u.sd.valid_max = def.u.sd.slider_max = 99;
+        def.u.sd.value = 1;
+        def.u.sd.dephault = kRenderVersionCurrent;
+        def.flags = PF_ParamFlag_USE_VALUE_FOR_OLD_PROJECTS | PF_ParamFlag_CANNOT_TIME_VARY;
+        def.ui_flags = PF_PUI_INVISIBLE;
+        def.uu.id = DISK_RENDER_VERSION;
+        if ((err = PF_ADD_PARAM(in_data, -1, &def)) != PF_Err_NONE)
+            return err;
+    }
+
+    // v2.3: custom UI events for the thumbnail pickers (Effect Controls only)
+    {
+        PF_CustomUIInfo ci;
+        AEFX_CLR_STRUCT(ci);
+        ci.events = PF_CustomEFlag_EFFECT;
+        if (in_data->inter.register_ui && (err = PF_REGISTER_UI(in_data, &ci)) != PF_Err_NONE)
+            return err;
+    }
+
+    out_data->num_params = OB_NUM_PARAMS;
+    return PF_Err_NONE;
+}
+
+// Lens Preset popup changed: write the preset into the character params (undoable, the user can
+// tweak freely afterwards). "Custom" writes nothing. Modelled on the SDK Supervisor sample:
+// set the new values + PF_ChangeFlag_CHANGED_VALUE on each changed param.
+PF_Err UpdateParamsUI(PF_InData* in_data, PF_OutData* out_data, PF_ParamDef* params[]);
+
+PF_Err UserChangedParam(PF_InData* in_data, PF_OutData* out_data, PF_ParamDef* params[], const PF_UserChangedParamExtra* which)
+{
+    if (!which || !params)
+        return PF_Err_NONE;
+    const int i = which->param_index;
+    if (i == OB_QUALITY)  // Best group enabled state, immediately
+        return UpdateParamsUI(in_data, out_data, params);
+    if (i == OB_PRESET)
+        ApplyPresetToParams(params[OB_PRESET]->u.pd.value, params);
+    else if (i == OB_LA_STYLE)
+        ApplyAberrationStyleToParams(params[OB_LA_STYLE]->u.pd.value, params);
+    else if (i == OB_GRAIN_STOCK)
+        ApplyGrainStockToParams(params[OB_GRAIN_STOCK]->u.pd.value, params);
+    else if (i == OB_EDGE_MODE)
+    {
+        // the user chose an edge behaviour: the hidden v2.1 checkbox no longer overrides it
+        if (params[OB_REPEAT_EDGE]->u.bd.value)
+        {
+            params[OB_REPEAT_EDGE]->u.bd.value = 0;
+            params[OB_REPEAT_EDGE]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+        }
+    }
+    else
+    {
+        // a hand edit of a param a popup wrote: that popup now says Custom (value 1). AE does not send
+        // USER_CHANGED_PARAM for values the effect itself changes, so this cannot loop.
+        auto toCustom = [&](int popup) {
+            if (params[popup]->u.pd.value != 1)
+            {
+                params[popup]->u.pd.value = 1;
+                params[popup]->uu.change_flags = PF_ChangeFlag_CHANGED_VALUE;
+            }
+        };
+        if (Contains(kPresetTargets, i))
+            toCustom(OB_PRESET);
+        if (Contains(kStyleTargets, i))
+            toCustom(OB_LA_STYLE);
+        if (Contains(kStockTargets, i))
+            toCustom(OB_GRAIN_STOCK);
+    }
+    return PF_Err_NONE;
+}
+
+// Beta Quality group: enabled only while Quality = Best. Sent on every param change and when a
+// project opens (PF_OutFlag_SEND_UPDATE_PARAMS_UI); only the UI flag changes, never a value, so
+// renders are unaffected (and nothing here is shared between threads).
+PF_Err UpdateParamsUI(PF_InData* in_data, PF_OutData* out_data, PF_ParamDef* params[])
+{
+    (void)out_data;
+    if (!params || !in_data->pica_basicP)
+        return PF_Err_NONE;
+    const bool best = params[OB_QUALITY]->u.pd.value == QUALITY_BEST;
+    const PF_ParamUtilsSuite3* pu = nullptr;
+    if (in_data->pica_basicP->AcquireSuite(kPFParamUtilsSuite, kPFParamUtilsSuiteVersion3, (const void**)&pu) || !pu)
+        return PF_Err_NONE;
+    PF_Err err = PF_Err_NONE;
+    const int hq[] = {OB_HQ_TEX_AMOUNT, OB_HQ_TEX_SCALE, OB_HQ_TEX_TYPE, OB_HQ_TEX_SEED, OB_HQ_SPECTRAL, OB_HQ_LATERAL_CA};
+    for (int i : hq)
+    {
+        const bool disabled = (params[i]->ui_flags & PF_PUI_DISABLED) != 0;
+        if (disabled != best)
+            continue;  // already in the right state
+        PF_ParamDef d = *params[i];
+        if (best)
+            d.ui_flags &= ~PF_PUI_DISABLED;
+        else
+            d.ui_flags |= PF_PUI_DISABLED;
+        ERR(pu->PF_UpdateParamUI(in_data->effect_ref, i, &d));
+    }
+    in_data->pica_basicP->ReleaseSuite(kPFParamUtilsSuite, kPFParamUtilsSuiteVersion3);
+    return err;
+}
+#else
 #include "kantan_ui.inc"  // Kantan: ParamsSetup, UserChangedParam, UpdateParamsUI
+#endif
 
 // Probes a layer param's size, then checks out the part of it that maps onto `need` (effect-layer
 // coords, stretched to fit). Leaves `ls.has` false if the param is empty.
@@ -1777,6 +2830,11 @@ PF_Err SmartPreRender(PF_InData* in_data, PF_OutData* out_data, PF_PreRenderExtr
         ERR(CheckoutSampledLayer(in_data, extra, outReq, OB_MAP_LAYER, CHECKOUT_MAP_PT_PROBE, CHECKOUT_MAP_PT, *plan, dsx, dsy, np,
                                  plan->mapPt));
     }
+#ifndef OB_KANTAN  // Kantan: Highlight Source is always Automatic (no highlight layer)
+    if (!err && !amountView && plan->ep.highlightSource != 0)
+        ERR(CheckoutSampledLayer(in_data, extra, outReq, OB_HL_LAYER, CHECKOUT_HL_PROBE, CHECKOUT_HL, *plan, dsx, dsy,
+                                 need, plan->hl));
+#endif
     if (err)
         return err;
 
@@ -1962,8 +3020,13 @@ struct PickerInfo
 
 bool PickerFor(int paramIndex, PickerInfo& pi)
 {
+#ifdef OB_KANTAN
     const int first = 1;  // Kantan popups have no "Custom"; the popup is the whole state
     auto apLens = KantanPopupOnly, apStyle = KantanPopupOnly, apStock = KantanPopupOnly;
+#else
+    const int first = 2;
+    auto apLens = ApplyPresetToParams, apStyle = ApplyAberrationStyleToParams, apStock = ApplyGrainStockToParams;
+#endif
     if (paramIndex == OB_LENS_PICKER)
         pi = {obthumb::LENS, OB_PRESET, apLens, first};
     else if (paramIndex == OB_STYLE_PICKER)
